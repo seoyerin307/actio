@@ -58,7 +58,7 @@ async def summarize_with_openai(content: str) -> str:
         return "(요약 실패)"
 
 @app.get("/sum2")
-async def sum2(q: str = "에스파"):
+async def sum2(q: str = "카리나"):
     articles = await fetch_news(q, 2)
     if not articles:
         return []
