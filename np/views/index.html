@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <title>뉴스 요약 검색</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      max-width: 700px;
+      margin: 20px auto;
+      padding: 0 10px;
+    }
+    input[type="text"] {
+      width: 70%;
+      padding: 8px;
+      font-size: 16px;
+    }
+    button {
+      padding: 9px 15px;
+      font-size: 16px;
+      cursor: pointer;
+    }
+    ul {
+      list-style: none;
+      padding-left: 0;
+    }
+    li {
+      margin-bottom: 20px;
+      border-bottom: 1px solid #ccc;
+      padding-bottom: 10px;
+    }
+    a {
+      font-weight: bold;
+      color: #0077cc;
+      text-decoration: none;
+    }
+    a:hover {
+      text-decoration: underline;
+    }
+    .summary {
+      margin-top: 5px;
+      color: #333;
+    }
+  </style>
+</head>
+<body>
+  <h1>뉴스 요약 검색</h1>
+  <input type="text" id="keywordInput" placeholder="키워드를 입력하세요" />
+  <button id="searchBtn">검색</button>
+
+  <ul id="newsList"></ul>
+
+  <script>
+    const searchBtn = document.getElementById('searchBtn');
+    const keywordInput = document.getElementById('keywordInput');
+    const newsList = document.getElementById('newsList');
+
+    async function fetchNews(keyword) {
+      try {
+        const response = await fetch(`/sum2?q=${encodeURIComponent(keyword)}`);
+        if (!response.ok) {
+          newsList.innerHTML = `<li>뉴스를 불러오는데 실패했습니다.</li>`;
+          return;
+        }
+        const data = await response.json();
+        if (data.length === 0) {
+          newsList.innerHTML = `<li>검색 결과가 없습니다.</li>`;
+          return;
+        }
+
+        newsList.innerHTML = '';
+        data.forEach(item => {
+          const li = document.createElement('li');
+
+          const titleLink = document.createElement('a');
+          titleLink.href = item.url;
+          titleLink.target = '_blank';
+          titleLink.textContent = item.title;
+
+          const summaryP = document.createElement('p');
+          summaryP.className = 'summary';
+          summaryP.textContent = item.summary;
+
+          li.appendChild(titleLink);
+          li.appendChild(summaryP);
+          newsList.appendChild(li);
+        });
+      } catch (error) {
+        newsList.innerHTML = `<li>오류가 발생했습니다: ${error.message}</li>`;
+      }
+    }
+
+    searchBtn.addEventListener('click', () => {
+      const keyword = keywordInput.value.trim();
+      if (keyword === '') {
+        alert('키워드를 입력하세요.');
+        return;
+      }
+      fetchNews(keyword);
+    });
+
+    // Enter 키로도 검색 가능하게
+    keywordInput.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter') {
+        searchBtn.click();
+      }
+    });
+  </script>
+</body>
+</html>
