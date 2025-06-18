@@ -11,7 +11,7 @@ services:
 
   node:
       build:
-        context: ./np
+        context: ./np/node
       dimage: seoyerin307/node-app:latest
       ports:
         - "3000:3000"
