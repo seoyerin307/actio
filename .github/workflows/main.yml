@@ -47,11 +47,11 @@ jobs:
             docker pull ${{ env.APP_DOCKER_IMAGE_NAME }}:latest
 
             echo "--- Stopping and Removing Old App Container ---"
-            docker stop restful_app || true
-            docker rm restful_app || true
+            docker stop node-app || true
+            docker rm node-app || true
 
             echo "--- Running New App Container ---"
-            docker run -d --restart always --name restful_app -p 8000:8000 ${{ env.APP_DOCKER_IMAGE_NAME }}:latest
+            docker run -d --restart always --name node-app -p 8000:8000 ${{ env.APP_DOCKER_IMAGE_NAME }}:latest
 
             echo "--- Cleaning up unused Docker images ---"
             docker system prune -f
