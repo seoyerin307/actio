@@ -8,7 +8,7 @@ on:
 env:
   DOCKER_HUB_USERNAME: ${{ secrets.DOCKER_HUB_USERNAME }}
   DOCKER_HUB_TOKEN: ${{ secrets.DOCKER_HUB_TOKEN }}
-  APP_DOCKER_IMAGE_NAME: seoyerin307/restful_app
+  APP_DOCKER_IMAGE_NAME: seoyerin307/node_app
   AWS_REGION: ap-northeast-2
   EC2_HOST: ${{ secrets.HOST }}
   EC2_USERNAME: ${{ secrets.USERNAME }}
