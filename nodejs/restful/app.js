@@ -19,5 +19,5 @@ var restful = require('./routes/restful.js');
 
 app.use('/', restful);
 app.listen(app.get('port'), () =>{
-console.log('8000 Port : 서버 실행')
+console.log('8000 Port : 버 실행')
 });
