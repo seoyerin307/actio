@@ -23,5 +23,5 @@ app.use((err, req, res, next) => {
 });
 
 app.listen(PORT, () => {
-  console.log(`서버가 http://13.54.187.196:3000 에서 시작되었습니.`);
+  console.log(`서버가 http://13.54.187.196:3000 에 시작되었습니.`);
 });
