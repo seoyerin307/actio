@@ -4,36 +4,51 @@ const axios = require("axios");
 
 const FASTAPI_BASE_URL = 'http://13.54.187.196:8080';
 
-// 통합 요청 핸들러
-router.get('/sum2', async (req, res) => {
-    const { q, sort, tts } = req.query;
+// 뉴스 요약 요청
+router.get('/summaries', async (req, res) => {
+    const { q, sort } = req.query;
+    if (!q || typeof q !== 'string' || q.trim() === '') {
+        return res.status(400).send('검색어(q) 파라미터가 필요합니다.');
+    }
     try {
-        const response = await axios.get(`${FASTAPI_BASE_URL}/sum2`, {
-            params: {
-                q: q || '에스파',
-                sort: sort || 'sim',
-                tts: tts === 'true'  // 프론트에서 'true' 문자열로 전송
-            },
-            responseType: tts ? 'arraybuffer' : 'json'
+        const response = await axios.get(`${FASTAPI_BASE_URL}/summaries`, {
+            params: { q, sort: sort || 'sim' }
         });
-
-        // TTS 응답 처리
-        if (tts && response.headers['content-type']?.includes('audio/mpeg')) {
-            res.set('Content-Type', 'audio/mpeg');
-            res.send(response.data);
-        } 
-        // 일반 JSON 응답 처리
-        else {
-            res.json(response.data);
-        }
-        
+        res.json(response.data);
     } catch (error) {
-        console.error('FastAPI 호출 실패:', error.message);
-        res.status(500).send(error.response?.data || '서버 오류 발생');
+        console.error('요약 조회 실패:', error.message);
+        res.status(error.response?.status || 500).send(
+            error.response?.data || '서버에서 뉴스 요약을 불러오는 데 실패했습니다.'
+        );
     }
 });
 
+// 음성 변환 요청
+router.get('/tts', async (req, res) => {
+    const { file_id } = req.query;
+    if (!file_id || typeof file_id !== 'string' || file_id.trim() === '') {
+        return res.status(400).send('file_id 파라미터가 필요합니다.');
+    }
+    try {
+        const response = await axios.get(`${FASTAPI_BASE_URL}/tts`, {
+            params: { file_id },
+            responseType: 'arraybuffer'
+        });
 
+        res.set({
+            'Content-Type': 'audio/mpeg',
+            'Content-Disposition': `inline; filename="${file_id}.mp3"`
+        });
+        res.send(response.data);
+    } catch (error) {
+        console.error('TTS 변환 실패:', error.message);
+        res.status(error.response?.status || 500).send(
+            error.response?.data || '서버에서 음성 변환에 실패했습니다.'
+        );
+    }
+});
+
+// 메인 페이지 렌더링
 router.get('/', (req, res) => {
     res.render('index');
 });

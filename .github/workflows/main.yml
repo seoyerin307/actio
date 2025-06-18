@@ -1,16 +1,57 @@
-name: remote ssh command
-on: [push]
+name: Deploy Node.js MVC App to EC2
+
+on:
+  push:
+    branches:
+      - main
+
+env:
+  DOCKER_HUB_USERNAME: ${{ secrets.DOCKER_HUB_USERNAME }}
+  DOCKER_HUB_TOKEN: ${{ secrets.DOCKER_HUB_TOKEN }}
+  APP_DOCKER_IMAGE_NAME: seoyerin307/restful_app
+  AWS_REGION: ap-northeast-2
+  EC2_HOST: ${{ secrets.HOST }}
+  EC2_USERNAME: ${{ secrets.USERNAME }}
+  EC2_KEY: ${{ secrets.KEY }}
+
 jobs:
-  build:
-    name: Build
+  build-and-deploy:
     runs-on: ubuntu-latest
     steps:
-      - name: executing remote ssh commands using password using ssh-actions
-        uses: appleboy/ssh-action@v0.1.10
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Login to Docker Hub
+        uses: docker/login-action@v3
         with:
-          host: ${{ secrets.HOST }}
-          username: ${{ secrets.USERNAME }}
-          key: ${{ secrets.KEY }}
+          username: ${{ env.DOCKER_HUB_USERNAME }}
+          password: ${{ env.DOCKER_HUB_TOKEN }}
+
+      - name: Build and Push Docker Image
+        uses: docker/build-push-action@v5
+        with:
+          context: ./nodejs/restful
+          file: ./nodejs/restful/Dockerfile
+          push: true
+          tags: ${{ env.APP_DOCKER_IMAGE_NAME }}:latest
+
+      - name: Deploy to EC2
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ env.EC2_HOST }}
+          username: ${{ env.EC2_USERNAME }}
+          key: ${{ env.EC2_KEY }}
           port: ${{ secrets.PORT }}
           script: |
-            ./deploy.sh
+            echo "--- Pulling Latest App Image ---"
+            docker pull ${{ env.APP_DOCKER_IMAGE_NAME }}:latest
+
+            echo "--- Stopping and Removing Old App Container ---"
+            docker stop restful_app || true
+            docker rm restful_app || true
+
+            echo "--- Running New App Container ---"
+            docker run -d --restart always --name restful_app -p 8000:8000 ${{ env.APP_DOCKER_IMAGE_NAME }}:latest
+
+            echo "--- Cleaning up unused Docker images ---"
+            docker system prune -f

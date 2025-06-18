@@ -1,9 +1,8 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ko">
 <head>
   <meta charset="UTF-8" />
-  <title>News Summarization & Text-to-Speech</title>
-  <link rel="stylesheet" href="https://fonts.googleapis.com/css?family=Roboto:400,700&display=swap">
+  <title>뉴스 요약 및 음성 변환</title>
   <style>
     body {
       font-family: 'Roboto', Arial, sans-serif;
@@ -125,14 +124,14 @@
 </head>
 <body>
   <div class="container">
-    <h1>News Summarization & Text-to-Speech</h1>
+    <h1>뉴스 요약 & 음성 변환 서비스</h1>
     <div class="search-bar">
-      <input type="text" id="keywordInput" placeholder="Enter a keyword" />
+      <input type="text" id="keywordInput" placeholder="검색어를 입력하세요" />
       <select id="sortSelect">
-        <option value="sim">Relevance</option>
-        <option value="date">Latest</option>
+        <option value="sim">관련도순</option>
+        <option value="date">최신순</option>
       </select>
-      <button id="searchBtn">Search</button>
+      <button id="searchBtn">검색</button>
     </div>
     <ul id="newsList"></ul>
   </div>
@@ -142,29 +141,29 @@
     const sortSelect = document.getElementById('sortSelect');
     const newsList = document.getElementById('newsList');
 
-    async function playTTS(keyword, sort) {
+    async function playTTS(fileId) {
       try {
-        const response = await fetch(`/sum2?q=${encodeURIComponent(keyword)}&sort=${sort}&tts=true`);
-        if (!response.ok) throw new Error('Text-to-speech failed');
+        const response = await fetch(`/tts?file_id=${encodeURIComponent(fileId)}`);
+        if (!response.ok) throw new Error('음성 변환에 실패했습니다');
         const audioBlob = await response.blob();
         const audioUrl = URL.createObjectURL(audioBlob);
         const audio = new Audio(audioUrl);
         audio.play();
       } catch (error) {
-        alert(`Error: ${error.message}`);
+        alert(`오류: ${error.message}`);
       }
     }
 
     async function fetchNews(keyword, sort) {
       try {
-        const response = await fetch(`/sum2?q=${encodeURIComponent(keyword)}&sort=${sort}`);
+        const response = await fetch(`/summaries?q=${encodeURIComponent(keyword)}&sort=${sort}`);
         if (!response.ok) {
-          newsList.innerHTML = `<li>Failed to load news.</li>`;
+          newsList.innerHTML = `<li>뉴스를 불러오지 못했습니다.</li>`;
           return;
         }
         const data = await response.json();
         if (data.length === 0) {
-          newsList.innerHTML = `<li>No results found.</li>`;
+          newsList.innerHTML = `<li>검색 결과가 없습니다.</li>`;
           return;
         }
         newsList.innerHTML = '';
@@ -184,8 +183,8 @@
 
           const ttsButton = document.createElement('button');
           ttsButton.className = 'tts-btn';
-          ttsButton.innerHTML = `<svg viewBox="0 0 20 20"><path d="M9 4.5a1 1 0 0 1 1.707-.707l5.5 5.5a1 1 0 0 1 0 1.414l-5.5 5.5A1 1 0 0 1 9 15.5v-11z"/></svg> Listen as Audio`;
-          ttsButton.onclick = () => playTTS(keyword, sort);
+          ttsButton.innerHTML = `<svg viewBox="0 0 20 20"><path d="M9 4.5a1 1 0 0 1 1.707-.707l5.5 5.5a1 1 0 0 1 0 1.414l-5.5 5.5A1 1 0 0 1 9 15.5v-11z"/></svg> 오디오로 듣기`;
+          ttsButton.onclick = () => playTTS(item.file_id);
 
           li.appendChild(titleLink);
           li.appendChild(summaryP);
@@ -193,7 +192,7 @@
           newsList.appendChild(li);
         });
       } catch (error) {
-        newsList.innerHTML = `<li>An error occurred: ${error.message}</li>`;
+        newsList.innerHTML = `<li>오류가 발생했습니다: ${error.message}</li>`;
       }
     }
 
@@ -201,7 +200,7 @@
       const keyword = keywordInput.value.trim();
       const sort = sortSelect.value;
       if (keyword === '') {
-        alert('Please enter a keyword.');
+        alert('검색어를 입력하세요.');
         return;
       }
       fetchNews(keyword, sort);
