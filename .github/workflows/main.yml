@@ -9,7 +9,7 @@ env:
   DOCKER_HUB_USERNAME: ${{ secrets.DOCKER_HUB_USERNAME }}
   DOCKER_HUB_TOKEN: ${{ secrets.DOCKER_HUB_TOKEN }}
   APP_DOCKER_IMAGE_NAME: seoyerin307/node-app
-  AWS_REGION: ap-northeast-2
+  AWS_REGION: ap-southeast-2
   EC2_HOST: ${{ secrets.HOST }}
   EC2_USERNAME: ${{ secrets.USERNAME }}
   EC2_KEY: ${{ secrets.KEY }}
@@ -30,8 +30,8 @@ jobs:
       - name: Build and Push Docker Image
         uses: docker/build-push-action@v5
         with:
-          context: ./nodejs/restful
-          file: ./nodejs/restful/Dockerfile
+          context: ./np
+          file: ./np/Dockerfile
           push: true
           tags: ${{ env.APP_DOCKER_IMAGE_NAME }}:latest
 
