@@ -64,8 +64,8 @@ jobs:
             docker rm fastapi-app || true
 
             echo "--- Running New App Container ---"
-            docker run -d --restart always --name fastapi-app -p 3000:3000 ${{ env.APP_DOCKER_IMAGE_NAME }}:latest
-            docker run -d --restart always --name node-app -p 8080:8080 ${{ env.APP_DOCKER_IMAGE_NAME }}:latest
+            docker run -d --restart always --name fastapi-app -p 8080:8080 ${{ env.APP_DOCKER_IMAGE_NAME }}:latest
+            docker run -d --restart always --name node-app -p 3000:3000 ${{ env.APP_DOCKER_IMAGE_NAME }}:latest
             
 
             echo "--- Cleaning up unused Docker images ---"
