@@ -1,35 +1,41 @@
 const express = require('express');
 const router = express.Router();
+const axios = require('axios');
+
+// FastAPI 서버 주소
+const FASTAPI_URL = 'http://13.54.187.196:8000';
 
 // 메인 페이지
 router.get('/', (req, res) => {
   res.render('index', { title: '통합 미디어 요약 서비스' });
 });
 
-// 뉴스 요약 API (예시)
-router.get('/summaries', (req, res) => {
-  const { q, sort } = req.query;
-  if (!q) return res.json([]);
-  res.json([
-    {
-      title: "뉴스 예시 제목",
-      summary: "이것은 뉴스 요약 예시입니다.",
-      url: "https://news.example.com"
-    }
-  ]);
+// 뉴스 요약 API (FastAPI 연동)
+router.get('/summaries', async (req, res) => {
+  try {
+    const { q, sort } = req.query;
+    const response = await axios.get(`${FASTAPI_URL}/news/summaries`, {
+      params: { q, sort }
+    });
+    res.json(response.data);
+  } catch (error) {
+    console.error('뉴스 요약 API 오류:', error.message);
+    res.status(500).json({ error: '뉴스 요약 중 오류 발생' });
+  }
 });
 
-// 유튜브 요약 API (예시)
-router.get('/youtube-summaries', (req, res) => {
-  const { keyword } = req.query;
-  if (!keyword) return res.json([]);
-  res.json([
-    {
-      video_id: "dQw4w9WgXcQ",
-      title: "유튜브 예시 제목",
-      summary: "이것은 유튜브 요약 예시입니다."
-    }
-  ]);
+// 유튜브 요약 API (FastAPI 연동)
+router.get('/youtube-summaries', async (req, res) => {
+  try {
+    const { keyword } = req.query;
+    const response = await axios.get(`${FASTAPI_URL}/youtube/summarize`, {
+      params: { keyword }
+    });
+    res.json(response.data);
+  } catch (error) {
+    console.error('유튜브 요약 API 오류:', error.message);
+    res.status(500).json({ error: '유튜브 요약 중 오류 발생' });
+  }
 });
 
 module.exports = router;
