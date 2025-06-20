@@ -1,0 +1,32 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: fastapi-deployment        # FastAPI 배포 이름
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: fastapi
+  template:
+    metadata:
+      labels:
+        app: fastapi
+    spec:
+      containers:
+        - name: fastapi
+          image: seoyerin307/fastapi-app:latest
+          ports:
+            - containerPort: 8080                # FastAPI가 실행되는 내부 포트
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: fastapi-service           # 클러스터 내부에서 nodejs가 fastapi에 요청할 때 사용하는 이름
+spec:
+  selector:
+    app: fastapi
+  ports:
+    - protocol: TCP
+      port: 8080                  # 클러스터 내부에서 사용할 포트
+      targetPort: 8080           # FastAPI 컨테이너가 실제로 리슨하는 포트
+  type: ClusterIP                 # 내부 통신용 서비스 (외부에서 접근 안됨)
