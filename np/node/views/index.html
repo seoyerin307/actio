@@ -2,7 +2,7 @@
 <html lang="ko">
 <head>
   <meta charset="UTF-8" />
-  <title>뉴스 요약 서비스</title>
+  <title>통합 미디어 요약 서비스</title>
   <style>
     body {
       font-family: 'Roboto', Arial, sans-serif;
@@ -11,7 +11,7 @@
       padding: 0;
     }
     .container {
-      max-width: 700px;
+      max-width: 1100px;
       margin: 40px auto;
       background: #fff;
       border-radius: 16px;
@@ -56,11 +56,35 @@
     button:hover {
       background: linear-gradient(90deg, #2563eb, #38bdf8);
     }
+    .result-flex {
+      display: flex;
+      gap: 32px;
+      justify-content: space-between;
+    }
+    .result-col {
+      flex: 1 1 0;
+      min-width: 0;
+      background: #f9fafb;
+      border-radius: 12px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+      padding: 20px 16px 16px 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .result-col h2 {
+      margin-top: 0;
+      margin-bottom: 12px;
+      font-size: 20px;
+      color: #2563eb;
+      text-align: center;
+    }
     ul {
       list-style: none;
       padding: 0;
+      margin: 0;
     }
-    .news-card {
+    .news-card, .yt-card {
       background: #f1f5f9;
       border-radius: 12px;
       box-shadow: 0 2px 8px rgba(0,0,0,0.04);
@@ -71,10 +95,10 @@
       gap: 8px;
       transition: box-shadow 0.2s;
     }
-    .news-card:hover {
+    .news-card:hover, .yt-card:hover {
       box-shadow: 0 4px 16px rgba(49,130,206,0.13);
     }
-    .news-title {
+    .news-title, .yt-title {
       font-size: 18px;
       font-weight: 700;
       color: #2563eb;
@@ -82,14 +106,17 @@
       text-decoration: none;
       transition: color 0.2s;
     }
-    .news-title:hover {
+    .news-title:hover, .yt-title:hover {
       color: #1e40af;
       text-decoration: underline;
     }
-    .summary {
+    .summary, .yt-summary {
       color: #374151;
       font-size: 16px;
       margin-bottom: 4px;
+    }
+    @media (max-width: 1000px) {
+      .result-flex { flex-direction: column; gap: 24px; }
     }
     @media (max-width: 600px) {
       .container { padding: 16px 4px; }
@@ -99,22 +126,32 @@
 </head>
 <body>
   <div class="container">
-    <h1>뉴스 요약 서비스</h1>
+    <h1>통합 미디어 요약 서비스</h1>
     <div class="search-bar">
       <input type="text" id="keywordInput" placeholder="검색어를 입력하세요" />
       <select id="sortSelect">
-        <option value="sim">관련度순</option>
+        <option value="sim">관련도순</option>
         <option value="date">최신순</option>
       </select>
       <button id="searchBtn">검색</button>
     </div>
-    <ul id="newsList"></ul>
+    <div class="result-flex">
+      <div class="result-col">
+        <h2>뉴스 요약</h2>
+        <ul id="newsList"></ul>
+      </div>
+      <div class="result-col">
+        <h2>유튜브 요약</h2>
+        <ul id="ytList"></ul>
+      </div>
+    </div>
   </div>
   <script>
     const searchBtn = document.getElementById('searchBtn');
     const keywordInput = document.getElementById('keywordInput');
     const sortSelect = document.getElementById('sortSelect');
     const newsList = document.getElementById('newsList');
+    const ytList = document.getElementById('ytList');
 
     async function fetchNews(keyword, sort) {
       try {
@@ -152,6 +189,42 @@
       }
     }
 
+    async function fetchYoutube(keyword) {
+      try {
+        const response = await fetch(`/youtube-summaries?keyword=${encodeURIComponent(keyword)}`);
+        if (!response.ok) {
+          ytList.innerHTML = `<li>유튜브 요약을 불러오지 못했습니다.</li>`;
+          return;
+        }
+        const data = await response.json();
+        if (data.length === 0) {
+          ytList.innerHTML = `<li>검색 결과가 없습니다.</li>`;
+          return;
+        }
+        ytList.innerHTML = '';
+        data.forEach(item => {
+          const li = document.createElement('li');
+          li.className = 'yt-card';
+
+          const titleLink = document.createElement('a');
+          titleLink.href = `https://youtu.be/${item.video_id}`;
+          titleLink.target = '_blank';
+          titleLink.textContent = item.title;
+          titleLink.className = 'yt-title';
+
+          const summaryP = document.createElement('p');
+          summaryP.className = 'yt-summary';
+          summaryP.innerHTML = item.summary;
+
+          li.appendChild(titleLink);
+          li.appendChild(summaryP);
+          ytList.appendChild(li);
+        });
+      } catch (error) {
+        ytList.innerHTML = `<li>오류가 발생했습니다: ${error.message}</li>`;
+      }
+    }
+
     searchBtn.addEventListener('click', () => {
       const keyword = keywordInput.value.trim();
       const sort = sortSelect.value;
@@ -160,6 +233,7 @@
         return;
       }
       fetchNews(keyword, sort);
+      fetchYoutube(keyword);
     });
 
     keywordInput.addEventListener('keydown', (e) => {
