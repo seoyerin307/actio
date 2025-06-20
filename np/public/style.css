@@ -1,126 +1,173 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8" />
+  <title><%= title %></title>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/css/style.css" />
+</head>
+<body>
+  <div class="container">
+    <h1>통합 미디어 요약 서비스</h1>
+    <div class="search-bar">
+      <input type="text" id="keywordInput" placeholder="검색어를 입력하세요" />
+      <select id="sortSelect">
+        <option value="sim">관련도순</option>
+        <option value="date">최신순</option>
+      </select>
+      <button id="searchBtn">검색</button>
+    </div>
+    <div class="result-flex">
+      <div class="result-col">
+        <h2>뉴스 요약</h2>
+        <ul id="newsList"></ul>
+      </div>
+      <div class="result-col">
+        <h2>유튜브 요약</h2>
+        <ul id="ytList"></ul>
+      </div>
+    </div>
+  </div>
+  <script src="/js/main.js"></script>
+</body>
+</html>
+5. style.css (/np/public/css/style.css)
+css
 body {
-  font-family: 'Roboto', Arial, sans-serif;
-  background: #f8fafc;
+  font-family: 'Noto Sans KR', 'Roboto', Arial, sans-serif;
+  background: #f6f8fa;
   margin: 0;
   padding: 0;
 }
-<style>
-    body {
-      font-family: 'Roboto', Arial, sans-serif;
-      background: #f8fafc;
-      margin: 0;
-      padding: 0;
-    }
-    .container {
-      max-width: 1100px;
-      margin: 40px auto;
-      background: #fff;
-      border-radius: 16px;
-      box-shadow: 0 4px 24px rgba(0,0,0,0.07);
-      padding: 32px 24px 24px 24px;
-    }
-    h1 {
-      text-align: center;
-      color: #2d3748;
-      margin-bottom: 24px;
-      letter-spacing: 1px;
-    }
-    .search-bar {
-      display: flex;
-      justify-content: center;
-      gap: 8px;
-      margin-bottom: 32px;
-    }
-    input[type="text"], select {
-      padding: 10px 12px;
-      font-size: 16px;
-      border: 1px solid #cbd5e1;
-      border-radius: 6px;
-      outline: none;
-      transition: border 0.2s;
-    }
-    input[type="text"]:focus, select:focus {
-      border-color: #3182ce;
-    }
-    button {
-      padding: 10px 18px;
-      font-size: 16px;
-      border: none;
-      border-radius: 6px;
-      background: linear-gradient(90deg, #3182ce, #63b3ed);
-      color: #fff;
-      font-weight: bold;
-      cursor: pointer;
-      transition: background 0.2s, box-shadow 0.2s;
-      box-shadow: 0 2px 8px rgba(49,130,206,0.08);
-    }
-    button:hover {
-      background: linear-gradient(90deg, #2563eb, #38bdf8);
-    }
-    .result-flex {
-      display: flex;
-      gap: 32px;
-      justify-content: space-between;
-    }
-    .result-col {
-      flex: 1 1 0;
-      min-width: 0;
-      background: #f9fafb;
-      border-radius: 12px;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.04);
-      padding: 20px 16px 16px 16px;
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
-    }
-    .result-col h2 {
-      margin-top: 0;
-      margin-bottom: 12px;
-      font-size: 20px;
-      color: #2563eb;
-      text-align: center;
-    }
-    ul {
-      list-style: none;
-      padding: 0;
-      margin: 0;
-    }
-    .news-card, .yt-card {
-      background: #f1f5f9;
-      border-radius: 12px;
-      box-shadow: 0 2px 8px rgba(0,0,0,0.04);
-      margin-bottom: 20px;
-      padding: 18px 20px 14px 20px;
-      display: flex;
-      flex-direction: column;
-      gap: 8px;
-      transition: box-shadow 0.2s;
-    }
-    .news-card:hover, .yt-card:hover {
-      box-shadow: 0 4px 16px rgba(49,130,206,0.13);
-    }
-    .news-title, .yt-title {
-      font-size: 18px;
-      font-weight: 700;
-      color: #2563eb;
-      margin-bottom: 4px;
-      text-decoration: none;
-      transition: color 0.2s;
-    }
-    .news-title:hover, .yt-title:hover {
-      color: #1e40af;
-      text-decoration: underline;
-    }
-    .summary, .yt-summary {
-      color: #374151;
-      font-size: 16px;
-      margin-bottom: 4px;
-    }
-    @media (max-width: 1000px) {
-      .result-flex { flex-direction: column; gap: 24px; }
-    }
-    @media (max-width: 600px) {
-      .container { padding: 16px 4px; }
-      .search-bar { flex-direction: column; gap: 12px; }
-    }
-  </style>
+
+.container {
+  max-width: 900px;
+  margin: 48px auto;
+  background: #fff;
+  border-radius: 18px;
+  box-shadow: 0 6px 32px rgba(0,0,0,0.09);
+  padding: 36px 28px 28px 28px;
+}
+
+h1 {
+  text-align: center;
+  color: #2563eb;
+  margin-bottom: 30px;
+  font-size: 2.5rem;
+  letter-spacing: 1.5px;
+}
+
+.search-bar {
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  margin-bottom: 36px;
+}
+
+input[type="text"], select {
+  padding: 12px 14px;
+  font-size: 17px;
+  border: 1.5px solid #cbd5e1;
+  border-radius: 8px;
+  outline: none;
+  transition: border 0.2s;
+  background: #f1f5f9;
+}
+
+input[type="text"]:focus, select:focus {
+  border-color: #2563eb;
+}
+
+button {
+  padding: 12px 22px;
+  font-size: 17px;
+  border: none;
+  border-radius: 8px;
+  background: linear-gradient(90deg, #2563eb, #60a5fa);
+  color: #fff;
+  font-weight: bold;
+  cursor: pointer;
+  transition: background 0.2s, box-shadow 0.2s;
+  box-shadow: 0 2px 10px rgba(49,130,206,0.09);
+}
+button:hover {
+  background: linear-gradient(90deg, #1e40af, #38bdf8);
+}
+
+.result-flex {
+  display: flex;
+  gap: 32px;
+  justify-content: space-between;
+}
+
+.result-col {
+  flex: 1 1 0;
+  min-width: 0;
+  background: #f9fafb;
+  border-radius: 14px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+  padding: 22px 16px 18px 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.result-col h2 {
+  margin-top: 0;
+  margin-bottom: 16px;
+  font-size: 1.25rem;
+  color: #2563eb;
+  text-align: center;
+  font-weight: 700;
+  letter-spacing: 1px;
+}
+
+ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.news-card, .yt-card {
+  background: #fff;
+  border-radius: 10px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+  margin-bottom: 18px;
+  padding: 16px 18px 12px 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+  transition: box-shadow 0.2s;
+  border-left: 4px solid #2563eb;
+}
+.news-card:hover, .yt-card:hover {
+  box-shadow: 0 4px 16px rgba(49,130,206,0.13);
+  background: #f1f5f9;
+}
+
+.news-title, .yt-title {
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: #2563eb;
+  margin-bottom: 3px;
+  text-decoration: none;
+  transition: color 0.2s;
+}
+.news-title:hover, .yt-title:hover {
+  color: #1e40af;
+  text-decoration: underline;
+}
+
+.summary, .yt-summary {
+  color: #374151;
+  font-size: 1rem;
+  margin-bottom: 2px;
+}
+
+@media (max-width: 900px) {
+  .result-flex { flex-direction: column; gap: 24px; }
+}
+@media (max-width: 600px) {
+  .container { padding: 14px 2px; }
+  .search-bar { flex-direction: column; gap: 12px; }
+}

@@ -1,50 +1,35 @@
-const express = require("express");
+const express = require('express');
 const router = express.Router();
-const axios = require("axios");
 
-const FASTAPI_BASE_URL = 'http://13.54.187.196:8080';
-
-// 뉴스 요약 요청
-router.get('/summaries', async (req, res) => {
-    const { q, sort } = req.query;
-    if (!q || typeof q !== 'string' || q.trim() === '') {
-        return res.status(400).send('검색어(q) 파라미터가 필요합니다.');
-    }
-    try {
-        const response = await axios.get(`${FASTAPI_BASE_URL}/news/summaries`, {
-            params: { q, sort: sort || 'sim' }
-        });
-        res.json(response.data);
-    } catch (error) {
-        console.error('뉴스 요약 조회 실패:', error.message);
-        res.status(error.response?.status || 500).send(
-            error.response?.data || '서버에서 뉴스 요약을 불러오는 데 실패했습니다.'
-        );
-    }
-});
-
-// 유튜브 영상 요약 요청
-router.get('/youtube-summaries', async (req, res) => {
-    const { keyword } = req.query;
-    if (!keyword || typeof keyword !== 'string' || keyword.trim() === '') {
-        return res.status(400).send('검색어(keyword) 파라미터가 필요합니다.');
-    }
-    try {
-        const response = await axios.get(`${FASTAPI_BASE_URL}/youtube/summarize`, {
-            params: { keyword }
-        });
-        res.json(response.data);
-    } catch (error) {
-        console.error('유튜브 요약 조회 실패:', error.message);
-        res.status(error.response?.status || 500).send(
-            error.response?.data || '서버에서 유튜브 요약을 불러오는 데 실패했습니다.'
-        );
-    }
-});
-
-// 메인 페이지 렌더링
+// 메인 페이지
 router.get('/', (req, res) => {
-    res.render('index');
+  res.render('index', { title: '통합 미디어 요약 서비스' });
+});
+
+// 뉴스 요약 API (예시)
+router.get('/summaries', (req, res) => {
+  const { q, sort } = req.query;
+  if (!q) return res.json([]);
+  res.json([
+    {
+      title: "뉴스 예시 제목",
+      summary: "이것은 뉴스 요약 예시입니다.",
+      url: "https://news.example.com"
+    }
+  ]);
+});
+
+// 유튜브 요약 API (예시)
+router.get('/youtube-summaries', (req, res) => {
+  const { keyword } = req.query;
+  if (!keyword) return res.json([]);
+  res.json([
+    {
+      video_id: "dQw4w9WgXcQ",
+      title: "유튜브 예시 제목",
+      summary: "이것은 유튜브 요약 예시입니다."
+    }
+  ]);
 });
 
 module.exports = router;
