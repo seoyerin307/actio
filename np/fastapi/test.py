@@ -7,11 +7,10 @@ import requests
 from pathlib import Path
 from typing import List
 from dotenv import load_dotenv
-from fastapi import FastAPI, Query, Response, HTTPException
+from fastapi import FastAPI, Query, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 import openai
-from elevenlabs.client import ElevenLabs
 from konlpy.tag import Okt
 
 # 환경변수 로드
@@ -23,7 +22,6 @@ SUPADATA_API_KEY = os.getenv("SUPADATA_API_KEY", "YOUR_SUPADATA_API_KEY")
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY", "YOUR_OPENAI_API_KEY")
 NAVER_CLIENT_ID = os.getenv("NAVER_CLIENT_ID", "YOUR_NAVER_CLIENT_ID")
 NAVER_CLIENT_SECRET = os.getenv("NAVER_CLIENT_SECRET", "YOUR_NAVER_CLIENT_SECRET")
-ELEVENLABS_API_KEY = os.getenv("ELEVENLABS_API_KEY", "YOUR_ELEVENLABS_API_KEY")
 
 # FastAPI 앱 초기화
 app = FastAPI(
@@ -40,12 +38,9 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# 클라이언트 초기화
 openai.api_key = OPENAI_API_KEY
-client = ElevenLabs(api_key=ELEVENLABS_API_KEY)
 okt = Okt()
 
-# 디렉토리 설정
 SUMMARY_DIR = Path("summaries")
 SUMMARY_DIR.mkdir(exist_ok=True, parents=True)
 
@@ -135,33 +130,6 @@ async def summarize_news(
         })
     return results
 
-@app.get("/news/tts")
-async def text_to_speech(
-    file_id: str = Query(..., description="summaries에서 받은 파일명"),
-    voice_id: str = Query("21m00Tcm4TlvDq8ikWAM")
-):
-    filepath = SUMMARY_DIR / file_id
-    if not filepath.exists():
-        raise HTTPException(status_code=404, detail="File not found")
-    with open(filepath, "r", encoding="utf-8") as f:
-        text = f.read()
-    try:
-        audio = client.text_to_speech.convert(
-            voice_id=voice_id,
-            model_id="eleven_multilingual_v2",
-            text=text,
-            output_format="mp3_44100_128",
-        )
-        audio_bytes = b"".join(audio)
-        return Response(
-            content=audio_bytes,
-            media_type="audio/mpeg",
-            headers={"Content-Disposition": f"inline; filename={file_id}.mp3"}
-        )
-    except Exception as e:
-        print(f"TTS 변환 오류: {e}")
-        raise HTTPException(status_code=500, detail="TTS processing failed")
-
 # ========== 유튜브 요약 기능 ========== #
 class VideoSummary(BaseModel):
     video_id: str
@@ -239,7 +207,7 @@ def summarize_youtube_text(text: str) -> str:
         )
 
 @app.get("/youtube/summarize", 
-         response_model=list[VideoSummary],
+         response_model=List[VideoSummary],
          responses={404: {"detail": "검색 결과 없음"}})
 async def summarize_videos(
     keyword: str = Query(..., description="검색할 키워드 (예: 인공지능)")

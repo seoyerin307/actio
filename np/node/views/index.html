@@ -2,7 +2,7 @@
 <html lang="ko">
 <head>
   <meta charset="UTF-8" />
-  <title>뉴스 요약 및 음성 변환</title>
+  <title>뉴스 요약 서비스</title>
   <style>
     body {
       font-family: 'Roboto', Arial, sans-serif;
@@ -91,31 +91,6 @@
       font-size: 16px;
       margin-bottom: 4px;
     }
-    .tts-btn {
-      align-self: flex-start;
-      background: #10b981;
-      color: #fff;
-      border: none;
-      border-radius: 6px;
-      padding: 7px 16px;
-      font-size: 15px;
-      font-weight: 500;
-      margin-top: 4px;
-      cursor: pointer;
-      transition: background 0.2s;
-      display: flex;
-      align-items: center;
-      gap: 6px;
-    }
-    .tts-btn:hover {
-      background: #059669;
-    }
-    .tts-btn svg {
-      width: 18px;
-      height: 18px;
-      vertical-align: middle;
-      fill: #fff;
-    }
     @media (max-width: 600px) {
       .container { padding: 16px 4px; }
       .search-bar { flex-direction: column; gap: 12px; }
@@ -124,11 +99,11 @@
 </head>
 <body>
   <div class="container">
-    <h1>뉴스 요약 & 음성 변환 서비스!</h1>
+    <h1>뉴스 요약 서비스</h1>
     <div class="search-bar">
       <input type="text" id="keywordInput" placeholder="검색어를 입력하세요" />
       <select id="sortSelect">
-        <option value="sim">관련도순</option>
+        <option value="sim">관련度순</option>
         <option value="date">최신순</option>
       </select>
       <button id="searchBtn">검색</button>
@@ -140,19 +115,6 @@
     const keywordInput = document.getElementById('keywordInput');
     const sortSelect = document.getElementById('sortSelect');
     const newsList = document.getElementById('newsList');
-
-    async function playTTS(fileId) {
-      try {
-        const response = await fetch(`/tts?file_id=${encodeURIComponent(fileId)}`);
-        if (!response.ok) throw new Error('음성 변환에 실패했습니다');
-        const audioBlob = await response.blob();
-        const audioUrl = URL.createObjectURL(audioBlob);
-        const audio = new Audio(audioUrl);
-        audio.play();
-      } catch (error) {
-        alert(`오류: ${error.message}`);
-      }
-    }
 
     async function fetchNews(keyword, sort) {
       try {
@@ -181,14 +143,8 @@
           summaryP.className = 'summary';
           summaryP.innerHTML = item.summary;
 
-          const ttsButton = document.createElement('button');
-          ttsButton.className = 'tts-btn';
-          ttsButton.innerHTML = `<svg viewBox="0 0 20 20"><path d="M9 4.5a1 1 0 0 1 1.707-.707l5.5 5.5a1 1 0 0 1 0 1.414l-5.5 5.5A1 1 0 0 1 9 15.5v-11z"/></svg> 오디오로 듣기`;
-          ttsButton.onclick = () => playTTS(item.file_id);
-
           li.appendChild(titleLink);
           li.appendChild(summaryP);
-          li.appendChild(ttsButton);
           newsList.appendChild(li);
         });
       } catch (error) {
