@@ -1,3 +1,9 @@
+body {
+  font-family: 'Roboto', Arial, sans-serif;
+  background: #f8fafc;
+  margin: 0;
+  padding: 0;
+}
 <style>
     body {
       font-family: 'Roboto', Arial, sans-serif;
@@ -6,7 +12,7 @@
       padding: 0;
     }
     .container {
-      max-width: 700px;
+      max-width: 1100px;
       margin: 40px auto;
       background: #fff;
       border-radius: 16px;
@@ -51,11 +57,35 @@
     button:hover {
       background: linear-gradient(90deg, #2563eb, #38bdf8);
     }
+    .result-flex {
+      display: flex;
+      gap: 32px;
+      justify-content: space-between;
+    }
+    .result-col {
+      flex: 1 1 0;
+      min-width: 0;
+      background: #f9fafb;
+      border-radius: 12px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+      padding: 20px 16px 16px 16px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .result-col h2 {
+      margin-top: 0;
+      margin-bottom: 12px;
+      font-size: 20px;
+      color: #2563eb;
+      text-align: center;
+    }
     ul {
       list-style: none;
       padding: 0;
+      margin: 0;
     }
-    .news-card {
+    .news-card, .yt-card {
       background: #f1f5f9;
       border-radius: 12px;
       box-shadow: 0 2px 8px rgba(0,0,0,0.04);
@@ -66,10 +96,10 @@
       gap: 8px;
       transition: box-shadow 0.2s;
     }
-    .news-card:hover {
+    .news-card:hover, .yt-card:hover {
       box-shadow: 0 4px 16px rgba(49,130,206,0.13);
     }
-    .news-title {
+    .news-title, .yt-title {
       font-size: 18px;
       font-weight: 700;
       color: #2563eb;
@@ -77,39 +107,17 @@
       text-decoration: none;
       transition: color 0.2s;
     }
-    .news-title:hover {
+    .news-title:hover, .yt-title:hover {
       color: #1e40af;
       text-decoration: underline;
     }
-    .summary {
+    .summary, .yt-summary {
       color: #374151;
       font-size: 16px;
       margin-bottom: 4px;
     }
-    .tts-btn {
-      align-self: flex-start;
-      background: #10b981;
-      color: #fff;
-      border: none;
-      border-radius: 6px;
-      padding: 7px 16px;
-      font-size: 15px;
-      font-weight: 500;
-      margin-top: 4px;
-      cursor: pointer;
-      transition: background 0.2s;
-      display: flex;
-      align-items: center;
-      gap: 6px;
-    }
-    .tts-btn:hover {
-      background: #059669;
-    }
-    .tts-btn svg {
-      width: 18px;
-      height: 18px;
-      vertical-align: middle;
-      fill: #fff;
+    @media (max-width: 1000px) {
+      .result-flex { flex-direction: column; gap: 24px; }
     }
     @media (max-width: 600px) {
       .container { padding: 16px 4px; }
