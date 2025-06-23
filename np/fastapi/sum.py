@@ -76,7 +76,7 @@ async def summarize_with_openai(content: str, keyword: str) -> str:
                     "role": "system",
                     "content": (
                         "뉴스 기사를 한국어 존댓말로 매우 상세하고 깊이 있게 요약해 주세요. "
-                        f"반드시 '{keyword}'에 관한 핵심 내용을 포함해 5~6문장으로 작성해 주세요. "
+                        f"반드시 '{keyword}'에 관한 핵심 내용을 포함해 3~4문장으로 작성해 주세요. "
                         "문체는 일관된 존댓말을 사용해 주세요."
                     ),
                 },
