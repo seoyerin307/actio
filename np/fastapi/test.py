@@ -55,7 +55,7 @@ def extract_nouns(query: str) -> str:
         print(f"명사 추출 오류: {e}")
         return query
 
-async def fetch_news(query: str, display: int = 2, sort: str = "sim") -> List[dict]:
+async def fetch_news(query: str, display: int = 3, sort: str = "sim") -> List[dict]:
     url = f"https://openapi.naver.com/v1/search/news.json?query={query}&display={display}&sort={sort}"
     headers = {
         "X-Naver-Client-Id": NAVER_CLIENT_ID,
