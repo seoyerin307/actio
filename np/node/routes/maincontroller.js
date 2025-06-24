@@ -9,7 +9,7 @@ const FASTAPI_URL = 'http://3.25.208.15:8080';
 // Axios 인스턴스 생성 (Keep-Alive 설정)
 const apiClient = axios.create({
   baseURL: FASTAPI_URL,
-  timeout: 5000,
+  timeout: 150000,
   httpAgent: new http.Agent({ keepAlive: true }), // HTTP 연결 재사용
   httpsAgent: new https.Agent({ keepAlive: true }) // HTTPS 연결 재사용
 });
