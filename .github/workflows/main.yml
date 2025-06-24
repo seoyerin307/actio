@@ -14,6 +14,13 @@ env:
   EC2_HOST: ${{ secrets.HOST }}
   EC2_USERNAME: ${{ secrets.USERNAME }}
   EC2_KEY: ${{ secrets.KEY }}
+  ELEVENLABS_API_KEY: ${{ secrets.ELEVENLABS_API_KEY }}
+  OPENAI_API_KEY: ${{ secrets.OPENAI_API_KEY }}
+  NAVER_CLIENT_ID: ${{ secrets.NAVER_CLIENT_ID }}
+  NAVER_CLIENT_SECRET: ${{ secrets.NAVER_CLIENT_SECRET }}
+  YOUTUBE_API_KEY: ${{ secrets.YOUTUBE_API_KEY }}
+  SUPADATA_API_KEY: ${{ secrets.SUPADATA_API_KEY }}
+
 
 jobs:
   build-and-deploy:
@@ -64,7 +71,7 @@ jobs:
             docker rm fastapi-app || true
 
             echo "--- Running New App Container ---"
-            docker run -d --restart always --name fastapi-app -p 8080:8080 ${{ env.FASTAPI_DOCKER_IMAGE_NAME }}:latest
+            docker run -d --restart always --name fastapi-app -e OPENAI_API_KEY="${{ secrets.OPENAI_API_KEY }}" -e ELEVENLABS_API_KEY="${{ secrets.ELEVENLABS_API_KEY }}" -e NAVER_CLIENT_ID="${{ secrets.NAVER_CLIENT_ID }}" -e NAVER_CLIENT_SECRET="${{ secrets.NAVER_CLIENT_SECRET }}" -e YOUTUBE_API_KEY="${{ secrets.YOUTUBE_API_KEY }}" -e SUPADATA_API_KEY="${{ secrets.SUPADATA_API_KEY }}" -p 8080:8080 ${{ env.FASTAPI_DOCKER_IMAGE_NAME }}:latest
             docker run -d --restart always --name node-app -p 3000:3000 ${{ env.NODE_DOCKER_IMAGE_NAME }}:latest
             
 
