@@ -34,5 +34,5 @@ app.use((err, req, res, next) => {
 });
 
 app.listen(PORT, '0.0.0.0', () => {
-  console.log(`서버가 http://localhost:${PORT}에서 시작되었습니다.`);
+  console.log(`서버가 http://3.25.208.15:${PORT}에서 시작되었습니다.`);
 });

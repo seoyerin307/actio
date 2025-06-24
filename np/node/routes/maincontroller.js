@@ -2,7 +2,7 @@ const express = require('express');
 const router = express.Router();
 const axios = require('axios');
 
-const FASTAPI_URL = 'http://localhost:8000';  // FastAPI 기본 주소
+const FASTAPI_URL = 'http://3.25.208.15:8080';  // FastAPI 기본 주소
 
 // 메인 페이지
 router.get('/', (req, res) => {
