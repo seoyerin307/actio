@@ -9,10 +9,10 @@ const PORT = process.env.PORT || 3000;
 // 1. 뷰 엔진 설정 (HTML 확장자 + EJS)
 app.engine('html', ejs.renderFile); // HTML 파일을 EJS 엔진으로 렌더링
 app.set('view engine', 'html'); // 확장자 명시
-app.set('views', path.join(__dirname, '../views')); // 뷰 디렉토리 설정
+app.set('views', path.join(__dirname, 'views')); // 뷰 디렉토리 설정
 
 // 2. 정적 파일 서빙
-app.use(express.static(path.join(__dirname, '../public')));
+app.use(express.static(path.join(__dirname, 'public')));
 
 // 3. 미들웨어
 app.use(express.json());
