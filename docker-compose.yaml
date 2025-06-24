@@ -1,22 +1,21 @@
-version: "3"
 services:
   fastapi:
     build:
       context: ./np/fastapi
-    image: seoyerin307/fastapi-app:latest
+    # image: seoyerin307/fastapi-app:latest
     ports:
       - "8080:8080"
-    env_file:
-      - ./fastapi-backend/.env
+    # env_file:
+    #   - ./fastapi-backend/.env
     networks:
       - app-network
 
   node:
       build:
         context: ./np/node
-      dimage: seoyerin307/node-app:latest
+      image: seoyerin307/node-app:latest
       ports:
-        - "3000:3000"
+        - "3001:3000"
       networks:
       - app-network
       depends_on:
