@@ -1,46 +1,44 @@
 <!DOCTYPE html>
 <html lang="ko">
 <head>
-  <meta charset="UTF-8" />
-  <title>통합 미디어 요약 서비스</title>
-  <link rel="stylesheet" href="/css/style.css" />
+    <meta charset="UTF-8" />
+    <title>통합 미디어 요약 서비스</title>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/css/style.css" />
 </head>
 <body>
-  <div class="container">
-    <h1>통합 미디어 요약 서비스</h1>
-    <div class="search-bar">
-      <input type="text" id="keywordInput" placeholder="검색어를 입력하세요" />
-      <select id="sortSelect">
-        <option value="sim">관련도순</option>
-        <option value="date">최신순</option>
-      </select>
-      <button id="searchBtn">검색</button>
+    <div class="container">
+        <h1>통합 미디어 요약 서비스</h1>
+        <div class="search-bar">
+            <input type="text" id="keywordInput" placeholder="검색어를 입력하세요" />
+            <select id="sortSelect">
+                <option value="sim">관련도순</option>
+                <option value="date">최신순</option>
+            </select>
+            <button id="searchBtn">검색</button>
+        </div>
+
+        <div class="result-flex">
+            <div class="result-col">
+                <h2>
+                    뉴스 요약
+                    <button class="select-all-btn" id="selectAllNews">전체 선택</button>
+                </h2>
+                <ul id="newsList"></ul>
+            </div>
+
+            <div class="result-col">
+                <h2>
+                    유튜브 요약
+                    <button class="select-all-btn" id="selectAllYt">전체 선택</button>
+                </h2>
+                <ul id="ytList"></ul>
+            </div>
+        </div>
+
+        <button id="reSummarizeBtn" class="re-summarize-btn">선택한 본문 재요약</button>
+        <div id="finalSummary"></div>
     </div>
-    
-    <div class="result-flex">
-      <!-- 뉴스 섹션 -->
-      <div class="result-col">
-        <h2>
-          뉴스 요약 
-          <button class="select-all-btn" id="selectAllNews">전체 선택</button>
-        </h2>
-        <ul id="newsList"></ul>
-      </div>
-      
-      <!-- 유튜브 섹션 -->
-      <div class="result-col">
-        <h2>
-          유튜브 요약 
-          <button class="select-all-btn" id="selectAllYt">전체 선택</button>
-        </h2>
-        <ul id="ytList"></ul>
-      </div>
-    </div>
-    
-    <!-- 재요약 버튼 & 결과 영역 -->
-    <button id="reSummarizeBtn" class="re-summarize-btn">선택한 본문 재요약</button>
-    <div id="finalSummary"></div>
-  </div>
-  <script src="/js/main.js"></script>
+    <script src="/js/main.js"></script>
 </body>
 </html>

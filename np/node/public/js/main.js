@@ -117,9 +117,16 @@ searchBtn.addEventListener('click', () => {
     fetchYoutube(keyword);
 
     // 새 검색 시 모든 섹션 다시 보이게 하기
-    resultFlexContainer.style.display = 'flex'; // 또는 'block' 또는 원래 display 속성으로
-    searchBar.style.display = 'flex'; // 검색 바도 보이게
-    reSummarizeBtn.style.display = 'block'; // 재요약 버튼도 보이게
+    // (resultFlexContainer, searchBar, reSummarizeBtn이 null이 아닐 때만 실행)
+    if (resultFlexContainer) {
+        resultFlexContainer.style.display = 'flex';
+    }
+    if (searchBar) {
+        searchBar.style.display = 'flex';
+    }
+    if (reSummarizeBtn) {
+        reSummarizeBtn.style.display = 'block';
+    }
     finalSummaryDiv.innerHTML = ''; // 새 검색 시 이전 결과 지우기
 });
 
@@ -135,9 +142,17 @@ reSummarizeBtn.addEventListener('click', async () => {
     showLoading(finalSummaryDiv); // 로딩 표시
 
     // 핵심 변경: 재요약 시작 시 다른 섹션들 숨기기
-    resultFlexContainer.style.display = 'none'; // 뉴스/유튜브 리스트 숨김
-    searchBar.style.display = 'none'; // 검색 바 숨김 (선택 사항)
-    reSummarizeBtn.style.display = 'none'; // 재요약 버튼 자체도 숨김 (선택 사항)
+    // (resultFlexContainer, searchBar, reSummarizeBtn이 null이 아닐 때만 실행)
+    if (resultFlexContainer) {
+        resultFlexContainer.style.display = 'none'; // 뉴스/유튜브 리스트 숨김
+    }
+    if (searchBar) {
+        searchBar.style.display = 'none'; // 검색 바 숨김 (선택 사항)
+    }
+    if (reSummarizeBtn) {
+        reSummarizeBtn.style.display = 'none'; // 재요약 버튼 자체도 숨김 (선택 사항)
+    }
+
 
     const selectedNews = Array.from(document.querySelectorAll('.news-checkbox:checked'))
         .map(cb => cb.closest('.news-card').dataset.original);
@@ -150,9 +165,15 @@ reSummarizeBtn.addEventListener('click', async () => {
     if (selectedOriginals.length === 0) {
         alert('최소 하나 이상의 본문을 선택하세요!');
         // 선택된 본문이 없을 경우 다시 보이게
-        resultFlexContainer.style.display = 'flex';
-        searchBar.style.display = 'flex';
-        reSummarizeBtn.style.display = 'block';
+        if (resultFlexContainer) {
+            resultFlexContainer.style.display = 'flex';
+        }
+        if (searchBar) {
+            searchBar.style.display = 'flex';
+        }
+        if (reSummarizeBtn) {
+            reSummarizeBtn.style.display = 'block';
+        }
         finalSummaryDiv.innerHTML = ''; // 로딩 메시지 지우기
         return;
     }
@@ -180,12 +201,18 @@ reSummarizeBtn.addEventListener('click', async () => {
                         <button id="backToSearchBtn" class="back-btn">새로운 검색</button>
                     </div>
                 `;
-                // '새로운 검색' 버튼 이벤트 리스너 추가
+                // '새로운 검색' 버튼 이벤트 리스너 추가 (요소가 생성된 후에 추가해야 함)
                 document.getElementById('backToSearchBtn').addEventListener('click', () => {
                     // 모든 섹션 다시 보이게
-                    resultFlexContainer.style.display = 'flex';
-                    searchBar.style.display = 'flex';
-                    reSummarizeBtn.style.display = 'block';
+                    if (resultFlexContainer) {
+                        resultFlexContainer.style.display = 'flex';
+                    }
+                    if (searchBar) {
+                        searchBar.style.display = 'flex';
+                    }
+                    if (reSummarizeBtn) {
+                        reSummarizeBtn.style.display = 'block';
+                    }
                     finalSummaryDiv.innerHTML = ''; // 최종 요약 결과 지우기
                     keywordInput.value = ''; // 검색어 입력창 초기화
                     newsList.innerHTML = ''; // 뉴스 목록 초기화
@@ -204,6 +231,7 @@ reSummarizeBtn.addEventListener('click', async () => {
 });
 
 // 전체 선택 버튼 (뉴스)
+// ?. (옵셔널 체이닝)을 사용하여 요소가 없을 때 에러가 발생하지 않도록 함
 document.getElementById('selectAllNews')?.addEventListener('click', () => {
     document.querySelectorAll('.news-checkbox').forEach(cb => cb.checked = true);
 });
