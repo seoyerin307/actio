@@ -6,8 +6,14 @@ const ytList = document.getElementById('ytList');
 const reSummarizeBtn = document.getElementById('reSummarizeBtn');
 const finalSummaryDiv = document.getElementById('finalSummary');
 
+// 로딩 표시 함수
+function showLoading(element) {
+  element.innerHTML = '<li class="loading">로딩 중...</li>';
+}
+
 // 뉴스 fetch!!
 async function fetchNews(keyword, sort) {
+  showLoading(newsList); // 로딩 표시
   try {
     const response = await fetch(`/summaries?q=${encodeURIComponent(keyword)}&sort=${sort}`);
     if (!response.ok) {
@@ -29,7 +35,8 @@ async function fetchNews(keyword, sort) {
       const checkbox = document.createElement('input');
       checkbox.type = 'checkbox';
       checkbox.className = 'news-checkbox summary-checkbox';
-      checkbox.checked = true;
+      // *** 여기를 수정했습니다: 기본적으로 체크되지 않도록 합니다. ***
+      checkbox.checked = false; // 또는 이 줄을 완전히 삭제합니다.
 
       const titleLink = document.createElement('a');
       titleLink.href = item.url;
@@ -53,6 +60,7 @@ async function fetchNews(keyword, sort) {
 
 // 유튜브 fetch
 async function fetchYoutube(keyword) {
+  showLoading(ytList); // 로딩 표시
   try {
     const response = await fetch(`/youtube-summaries?keyword=${encodeURIComponent(keyword)}`);
     if (!response.ok) {
@@ -74,10 +82,11 @@ async function fetchYoutube(keyword) {
       const checkbox = document.createElement('input');
       checkbox.type = 'checkbox';
       checkbox.className = 'yt-checkbox summary-checkbox';
-      checkbox.checked = true;
+      // *** 여기를 수정했습니다: 기본적으로 체크되지 않도록 합니다. ***
+      checkbox.checked = false; // 또는 이 줄을 완전히 삭제합니다.
 
       const titleLink = document.createElement('a');
-      titleLink.href = `https://youtu.be/${item.video_id}`;
+      titleLink.href = `https://youtu.be/$${item.video_id}`;
       titleLink.target = '_blank';
       titleLink.textContent = item.title;
       titleLink.className = 'yt-title';
@@ -118,6 +127,7 @@ keywordInput.addEventListener('keydown', (e) => {
 
 // "선택한 본문 재요약" 버튼 이벤트
 reSummarizeBtn.addEventListener('click', async () => {
+  showLoading(finalSummaryDiv); // 로딩 표시
   // 선택된 뉴스 본문
   const selectedNews = Array.from(document.querySelectorAll('.news-checkbox:checked'))
     .map(cb => cb.closest('.news-card').dataset.original);
