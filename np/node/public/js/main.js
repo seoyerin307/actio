@@ -6,9 +6,12 @@ const ytList = document.getElementById('ytList');
 const reSummarizeBtn = document.getElementById('reSummarizeBtn');
 const finalSummaryDiv = document.getElementById('finalSummary');
 
-// 추가된 요소들: result-flex 컨테이너를 숨기기 위함
 const resultFlexContainer = document.querySelector('.result-flex');
-const searchBar = document.querySelector('.search-bar'); // 검색 바도 필요하다면 숨기기 위해 추가
+const searchBar = document.querySelector('.search-bar');
+
+// 이전 뉴스/유튜브 결과를 저장할 변수 추가
+let previousNewsHtml = '';
+let previousYtHtml = '';
 
 // 로딩 표시 함수
 function showLoading(element) {
@@ -55,6 +58,9 @@ async function fetchNews(keyword, sort) {
             li.appendChild(summaryP);
             newsList.appendChild(li);
         });
+        // 뉴스 결과를 불러온 후 previousNewsHtml에 저장 (매번 업데이트)
+        previousNewsHtml = newsList.innerHTML;
+
     } catch (error) {
         newsList.innerHTML = `<li>오류가 발생했습니다: ${error.message}</li>`;
     }
@@ -100,6 +106,9 @@ async function fetchYoutube(keyword) {
             li.appendChild(summaryP);
             ytList.appendChild(li);
         });
+        // 유튜브 결과를 불러온 후 previousYtHtml에 저장 (매번 업데이트)
+        previousYtHtml = ytList.innerHTML;
+
     } catch (error) {
         ytList.innerHTML = `<li>오류가 발생했습니다: ${error.message}</li>`;
     }
@@ -116,8 +125,7 @@ searchBtn.addEventListener('click', () => {
     fetchNews(keyword, sort);
     fetchYoutube(keyword);
 
-    // 새 검색 시 모든 섹션 다시 보이게 하기
-    // (resultFlexContainer, searchBar, reSummarizeBtn이 null이 아닐 때만 실행)
+    // 새 검색 시 모든 섹션 다시 보이게 하기 (초기 상태)
     if (resultFlexContainer) {
         resultFlexContainer.style.display = 'flex';
     }
@@ -141,18 +149,16 @@ keywordInput.addEventListener('keydown', (e) => {
 reSummarizeBtn.addEventListener('click', async () => {
     showLoading(finalSummaryDiv); // 로딩 표시
 
-    // 핵심 변경: 재요약 시작 시 다른 섹션들 숨기기
-    // (resultFlexContainer, searchBar, reSummarizeBtn이 null이 아닐 때만 실행)
+    // 재요약 시작 시 다른 섹션들 숨기기
     if (resultFlexContainer) {
-        resultFlexContainer.style.display = 'none'; // 뉴스/유튜브 리스트 숨김
+        resultFlexContainer.style.display = 'none';
     }
     if (searchBar) {
-        searchBar.style.display = 'none'; // 검색 바 숨김 (선택 사항)
+        searchBar.style.display = 'none';
     }
     if (reSummarizeBtn) {
-        reSummarizeBtn.style.display = 'none'; // 재요약 버튼 자체도 숨김 (선택 사항)
+        reSummarizeBtn.style.display = 'none';
     }
-
 
     const selectedNews = Array.from(document.querySelectorAll('.news-checkbox:checked'))
         .map(cb => cb.closest('.news-card').dataset.original);
@@ -198,11 +204,34 @@ reSummarizeBtn.addEventListener('click', async () => {
                     <div class="final-summary-card">
                         <h3>최종 요약 결과</h3>
                         <p>${result.summary}</p>
-                        <button id="backToSearchBtn" class="back-btn">새로운 검색</button>
+                        <button id="backToPreviousBtn" class="back-btn">이전 결과로 돌아가기</button>
+                        <button id="startNewSearchBtn" class="back-btn" style="margin-left: 10px;">새로운 검색</button>
                     </div>
                 `;
-                // '새로운 검색' 버튼 이벤트 리스너 추가 (요소가 생성된 후에 추가해야 함)
-                document.getElementById('backToSearchBtn').addEventListener('click', () => {
+                // '이전 결과로 돌아가기' 버튼 이벤트 리스너 추가
+                document.getElementById('backToPreviousBtn').addEventListener('click', () => {
+                    // 숨겼던 섹션들을 이전 상태로 복원
+                    if (resultFlexContainer) {
+                        resultFlexContainer.style.display = 'flex';
+                    }
+                    if (searchBar) {
+                        searchBar.style.display = 'flex';
+                    }
+                    if (reSummarizeBtn) {
+                        reSummarizeBtn.style.display = 'block';
+                    }
+                    finalSummaryDiv.innerHTML = ''; // 최종 요약 결과 지우기
+
+                    // 저장해 둔 이전 뉴스/유튜브 HTML로 복원
+                    newsList.innerHTML = previousNewsHtml;
+                    ytList.innerHTML = previousYtHtml;
+
+                    // 스크롤도 다시 위로
+                    window.scrollTo({ top: 0, behavior: 'smooth' });
+                });
+
+                // '새로운 검색' 버튼 이벤트 리스너 추가 (기존 기능)
+                document.getElementById('startNewSearchBtn').addEventListener('click', () => {
                     // 모든 섹션 다시 보이게
                     if (resultFlexContainer) {
                         resultFlexContainer.style.display = 'flex';
@@ -217,6 +246,13 @@ reSummarizeBtn.addEventListener('click', async () => {
                     keywordInput.value = ''; // 검색어 입력창 초기화
                     newsList.innerHTML = ''; // 뉴스 목록 초기화
                     ytList.innerHTML = ''; // 유튜브 목록 초기화
+
+                    // 이전 데이터도 초기화
+                    previousNewsHtml = '';
+                    previousYtHtml = '';
+
+                    // 스크롤도 다시 위로
+                    window.scrollTo({ top: 0, behavior: 'smooth' });
                 });
             }
         }
@@ -231,7 +267,6 @@ reSummarizeBtn.addEventListener('click', async () => {
 });
 
 // 전체 선택 버튼 (뉴스)
-// ?. (옵셔널 체이닝)을 사용하여 요소가 없을 때 에러가 발생하지 않도록 함
 document.getElementById('selectAllNews')?.addEventListener('click', () => {
     document.querySelectorAll('.news-checkbox').forEach(cb => cb.checked = true);
 });
