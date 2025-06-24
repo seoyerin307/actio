@@ -6,7 +6,7 @@ const ytList = document.getElementById('ytList');
 const reSummarizeBtn = document.getElementById('reSummarizeBtn');
 const finalSummaryDiv = document.getElementById('finalSummary');
 
-// 뉴스 fetch
+// 뉴스 fetch!!
 async function fetchNews(keyword, sort) {
   try {
     const response = await fetch(`/summaries?q=${encodeURIComponent(keyword)}&sort=${sort}`);
