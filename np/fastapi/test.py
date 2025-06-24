@@ -33,9 +33,9 @@ print(f"NAVER_CLIENT_SECRET loaded: {'Yes' if NAVER_CLIENT_SECRET != 'YOUR_NAVER
 
 
 app = FastAPI(
-    title="통합 미디어 요약 API", # 이 줄의 들여쓰기 수정됨
-    description="뉴스 요약 + 유튜브 영상 요약 서비스", # 이 줄의 들여쓰기 수정됨
-    version="1.0.0" # 이 줄의 들여쓰기 수정됨
+    title="통합 미디어 요약 API",
+    description="뉴스 요약 + 유튜브 영상 요약 서비스",
+    version="1.0.0"
 )
 
 app.add_middleware(
@@ -71,8 +71,8 @@ async def fetch_news(query: str, display: int = 3, sort: str = "sim") -> List[di
     }
     try:
         async with httpx.AsyncClient() as client_http:
-            resp = await client_http.get(url, headers=headers, timeout=10) # 타임아웃 추가
-            resp.raise_for_status() # 200 이외의 상태 코드에 대해 예외 발생
+            resp = await client_http.get(url, headers=headers, timeout=10)
+            resp.raise_for_status()
             data = resp.json()
             return [
                 {
@@ -148,7 +148,7 @@ async def summarize_news(
                 "url": article["url"],
                 "summary": summary,
                 "file_id": file_id,
-                "description": article["description"]  # 원본 본문도 반환
+                "description": article["description"]
             })
         return results
     except Exception as e:
@@ -162,7 +162,7 @@ class VideoSummary(BaseModel):
     video_id: str
     title: str
     summary: str
-    transcript: str = ""  # 자막 원본 추가
+    transcript: str = ""
 
 def search_youtube_videos(keyword: str) -> list:
     url = "https://www.googleapis.com/youtube/v3/search"
@@ -337,15 +337,15 @@ async def summarize_originals(originals: dict = Body(...)):
                 {
                     "role": "system",
                     "content": (
-                        "다음 여러 뉴스 기사와 유튜브 영상 본문을 종합해 핵심 내용을 한국어로 요약해 주세요."
+                        "다음 여러 뉴스 기사와 유튜브 영상 본문을 종합해 핵심 내용을 한국어로 상세하게 요약해 주세요. " # "상세하게" 추가
                         "각 줄은 핵심 내용을 담아야 하며, 불필요하게 문장을 늘리지 마세요."
-                        "중복되는 내용은 한 번만 포함하고, 전체 흐름을 자연스럽게 정리하되, 반드시 10줄 이상으로 요약해 주세요."
+                        "중복되는 내용은 한 번만 포함하고, 전체 흐름을 자연스럽게 정리하되, 반드시 15줄 이상으로 요약해 주세요." # 10줄 -> 15줄로 변경
                     )
                 },
                 {"role": "user", "content": combined_text}
             ],
             temperature=0.2,
-            max_tokens=1000
+            max_tokens=3000 # 2000에서 3000으로 늘림
         )
         return {"summary": response.choices[0].message['content']}
     except openai.error.AuthenticationError as e:
