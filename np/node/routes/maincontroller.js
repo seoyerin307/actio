@@ -2,15 +2,14 @@ const express = require('express');
 const router = express.Router();
 const axios = require('axios');
 
-// FastAPI 서버 주소
-const FASTAPI_URL = 'http://13.54.187.196:8000';
+const FASTAPI_URL = 'http://localhost:8000';  // FastAPI 기본 주소
 
 // 메인 페이지
 router.get('/', (req, res) => {
   res.render('index', { title: '통합 미디어 요약 서비스' });
 });
 
-// 뉴스 요약 API (FastAPI 연동)
+// 뉴스 요약 API
 router.get('/summaries', async (req, res) => {
   try {
     const { q, sort } = req.query;
@@ -24,7 +23,7 @@ router.get('/summaries', async (req, res) => {
   }
 });
 
-// 유튜브 요약 API (FastAPI 연동)
+// 유튜브 요약 API
 router.get('/youtube-summaries', async (req, res) => {
   try {
     const { keyword } = req.query;
@@ -35,6 +34,22 @@ router.get('/youtube-summaries', async (req, res) => {
   } catch (error) {
     console.error('유튜브 요약 API 오류:', error.message);
     res.status(500).json({ error: '유튜브 요약 중 오류 발생' });
+  }
+});
+
+// 재요약 API (수정된 부분)
+router.post('/summarize-originals', async (req, res) => {
+  try {
+    const { originals } = req.body;
+    // ✅ FASTAPI_URL 변수를 사용해 올바른 주소 지정
+    const response = await axios.post(
+      `${FASTAPI_URL}/summarize-originals`,
+      { originals }
+    );
+    res.json(response.data);
+  } catch (error) {
+    console.error('재요약 API 오류:', error.message);
+    res.status(500).json({ summary: '재요약 중 오류 발생' });
   }
 });
 

@@ -8,11 +8,11 @@ const PORT = process.env.PORT || 3000;
 
 // 뷰 엔진 설정 (EJS 또는 HTML)
 app.engine('html', ejs.renderFile);
-app.set('views', path.join(__dirname, '../views')); // ../views로 수정!
+app.set('views', path.join(__dirname, '../views'));
 app.set('view engine', 'html');
 
 // 정적 파일 서빙
-app.use(express.static(path.join(__dirname, '../public'))); // ../public로 수정!
+app.use(express.static(path.join(__dirname, '../public')));
 
 // 미들웨어
 app.use(express.json());

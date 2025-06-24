@@ -8,7 +8,7 @@ import time
 from pathlib import Path
 from typing import List
 from dotenv import load_dotenv
-from fastapi import FastAPI, Query, HTTPException
+from fastapi import FastAPI, Query, HTTPException, Body
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 import openai
@@ -107,7 +107,7 @@ async def summarize_news(
     smart_search: bool = True
 ):
     search_query = extract_nouns(q) if smart_search else q
-    articles = await fetch_news(search_query, 2, sort)
+    articles = await fetch_news(search_query, 3, sort)
     if not articles:
         return []
     results = []
@@ -123,7 +123,8 @@ async def summarize_news(
             "title": article["title"],
             "url": article["url"],
             "summary": summary,
-            "file_id": file_id
+            "file_id": file_id,
+            "description": article["description"]  # 원본 본문도 반환
         })
     return results
 
@@ -131,6 +132,7 @@ class VideoSummary(BaseModel):
     video_id: str
     title: str
     summary: str
+    transcript: str = ""  # 자막 원본 추가
 
 def search_youtube_videos(keyword: str) -> list:
     url = "https://www.googleapis.com/youtube/v3/search"
@@ -194,7 +196,7 @@ def summarize_youtube_text(text: str) -> str:
     if not text or len(text.strip()) == 0:
         return "자막 내용 없음"
     prompt = (
-        "아래 유튜브 영상 자막 내용을 한국어로 3~4줄로 요약해줘.\n"
+        "아래 유튜브 영상 자막 내용을 한국어로 1줄로 요약해줘.\n"
         "자막:\n" + text[:8000]
     )
     try:
@@ -230,14 +232,16 @@ async def summarize_videos(
                 results.append(VideoSummary(
                     video_id=video['id'],
                     title=video['title'],
-                    summary=summary
+                    summary=summary,
+                    transcript=transcript  # 자막 원본도 반환
                 ))
             except HTTPException as e:
                 print(f"영상 {video['id']} 처리 실패: {e.detail}")
                 results.append(VideoSummary(
                     video_id=video['id'],
                     title=video['title'],
-                    summary=f"요약 불가: {e.detail[:50]}"
+                    summary=f"요약 불가: {e.detail[:50]}",
+                    transcript=""
                 ))
         return results
     except HTTPException as he:
@@ -247,6 +251,40 @@ async def summarize_videos(
             status_code=500,
             detail=f"서버 오류: {str(e)}"
         )
+
+# 선택한 본문 합쳐서 재요약
+@app.post("/summarize-originals")
+async def summarize_originals(originals: dict = Body(...)):
+    """
+    originals = {"originals": [ ... ]}
+    """
+    originals_list = originals.get("originals", [])
+    if not originals_list:
+        return {"summary": "선택된 본문이 없습니다."}
+    combined_text = "\n\n".join(originals_list)
+    try:
+        # 너무 긴 경우 앞부분만 자르기 (OpenAI 토큰 제한 방지)
+        if len(combined_text) > 3500:
+            combined_text = combined_text[:3500] + "... [중략]"
+        response = await openai.ChatCompletion.acreate(
+            model="gpt-3.5-turbo",
+            messages=[
+                {
+                    "role": "system",
+                    "content": (
+                        "다음 여러 뉴스 기사와 유튜브 영상 본문을 종합해 핵심 내용을 한국어로 요약해 주세요."
+                        "각 줄은 핵심 내용을 담아야 하며, 불필요하게 문장을 늘리지 마세요."
+                        "중복되는 내용은 한 번만 포함하고, 전체 흐름을 자연스럽게 정리하되, 반드시 10줄 이상으로 요약해 주세요."
+                    )
+                },
+                {"role": "user", "content": combined_text}
+            ],
+            temperature=0.2,
+            max_tokens=1000
+        )
+        return {"summary": response.choices[0].message['content']}
+    except Exception as e:
+        return {"summary": f"재요약 실패: {str(e)}"}
 
 if __name__ == "__main__":
     import uvicorn

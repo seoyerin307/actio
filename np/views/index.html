@@ -16,16 +16,30 @@
       </select>
       <button id="searchBtn">검색</button>
     </div>
+    
     <div class="result-flex">
+      <!-- 뉴스 섹션 -->
       <div class="result-col">
-        <h2>뉴스 요약</h2>
+        <h2>
+          뉴스 요약 
+          <button class="select-all-btn" id="selectAllNews">전체 선택</button>
+        </h2>
         <ul id="newsList"></ul>
       </div>
+      
+      <!-- 유튜브 섹션 -->
       <div class="result-col">
-        <h2>유튜브 요약</h2>
+        <h2>
+          유튜브 요약 
+          <button class="select-all-btn" id="selectAllYt">전체 선택</button>
+        </h2>
         <ul id="ytList"></ul>
       </div>
     </div>
+    
+    <!-- 재요약 버튼 & 결과 영역 -->
+    <button id="reSummarizeBtn" class="re-summarize-btn">선택한 본문 재요약</button>
+    <div id="finalSummary"></div>
   </div>
   <script src="/js/main.js"></script>
 </body>
