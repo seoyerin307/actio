@@ -155,12 +155,16 @@ reSummarizeBtn.addEventListener('click', async () => {
     if (!contentType.includes('application/json')) {
       const text = await response.text();
       finalSummaryDiv.innerHTML = `<div class="final-summary-card" style="color:red;">서버 오류: <pre>${text.slice(0, 500)}</pre></div>`;
+      // 오류 발생 시에도 스크롤
+      finalSummaryDiv.scrollIntoView({ behavior: 'smooth', block: 'start' });
       return;
     }
 
     const result = await response.json();
     if (!result.summary) {
       finalSummaryDiv.innerHTML = `<div class="final-summary-card" style="color:red;">요약 결과가 없습니다.</div>`;
+      // 요약 결과가 없을 때도 스크롤
+      finalSummaryDiv.scrollIntoView({ behavior: 'smooth', block: 'start' });
       return;
     }
     finalSummaryDiv.innerHTML = `
@@ -169,8 +173,12 @@ reSummarizeBtn.addEventListener('click', async () => {
         <p>${result.summary}</p>
       </div>
     `;
+    // *** 이 줄을 추가합니다 ***
+    finalSummaryDiv.scrollIntoView({ behavior: 'smooth', block: 'start' });
   } catch (error) {
     finalSummaryDiv.innerHTML = `<div class="final-summary-card" style="color:red;">재요약 중 오류: ${error.message}</div>`;
+    // 에러 발생 시에도 스크롤
+    finalSummaryDiv.scrollIntoView({ behavior: 'smooth', block: 'start' });
   }
 });
 
