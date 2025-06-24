@@ -1,8 +1,9 @@
 #FROM python:3.10
-FROM python:3.9-slim-bullseye # <-- 당신의 실제 FROM 이미지로 변경하세요
+FROM python:3.9-slim-bullseye 
+# <-- 당신의 실제 FROM 이미지로 변경하세요
 
 RUN apt-get update && \
-    apt-get install -y openjdk-17-jre-headless && \ # headless는 GUI 없는 서버 환경에 적합합니다.
+    apt-get install -y openjdk-17-jre-headless && \
     apt-get clean && \
     rm -rf /var/lib/apt/lists/*
 
