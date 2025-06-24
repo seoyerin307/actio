@@ -25,7 +25,7 @@ NAVER_CLIENT_ID = os.getenv("NAVER_CLIENT_ID", "YOUR_NAVER_CLIENT_ID")
 NAVER_CLIENT_SECRET = os.getenv("NAVER_CLIENT_SECRET", "YOUR_NAVER_CLIENT_SECRET")
 
 app = FastAPI(
-    title="통합 미디어 요약 API",
+    title="통합 미디어 요약 API",
     description="뉴스 요약 + 유튜브 영상 요약 서비스",
     version="1.0.0"
 )
