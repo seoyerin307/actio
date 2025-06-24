@@ -127,7 +127,6 @@ async def summarize_videos(
             # 자막 추출
             transcript = get_auto_captions(video['id'])
             
-            # 요약
             summary = summarize_text(transcript) if transcript else "자막 없음"
             
             results.append(VideoSummary(
