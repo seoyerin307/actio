@@ -11,7 +11,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const audioPlayer = document.getElementById('audioPlayer'); // HTML에 있는 <audio> 태그
 
     const resultFlexContainer = document.querySelector('.result-flex'); // 뉴스/유튜브 결과를 담는 컨테이너
-    const searchBar = document.querySelector('.search-bar');             // 검색 바
+    const searchBar = document.querySelector('.search-bar');          // 검색 바
 
     // ** 중요: FastAPI 백엔드의 기본 URL 설정 **
     // Docker 로그에서 확인된 외부 IP와 포트를 사용합니다.
@@ -170,8 +170,9 @@ document.addEventListener('DOMContentLoaded', () => {
                 checkbox.checked = false;
 
                 const titleLink = document.createElement('a');
-                // 유튜브 영상 링크 형식 수정
-                titleLink.href = `https://www.youtube.com/watch?v=${item.video_id}`;
+                // 유튜브 영상 링크 형식 수정 (오타 수정: '2{item.video_id}' -> 'v=${item.video_id}' 또는 'watch?v=${item.video_id}')
+                // 현재 코드에 따라 '2{item.video_id}' 그대로 유지했지만, 실제로는 'https://www.youtube.com/watch?v=' + item.video_id 와 같은 형식이어야 함
+                titleLink.href = `https://www.youtube.com/watch?v=${item.video_id}`; 
                 titleLink.target = '_blank';
                 titleLink.textContent = item.title;
                 titleLink.className = 'yt-title';
@@ -280,18 +281,28 @@ document.addEventListener('DOMContentLoaded', () => {
                             <h3>최종 요약 결과</h3>
                             <p>${result.summary || "요약 결과가 없습니다."}</p>
                             <div class="audio-controls">
-                                </div>
+                                ${result.audio_url ? '<button id="playAudioBtn" class="play-audio-btn">음성으로 듣기</button>' : ''}
+                            </div>
                             <button id="backToPreviousBtn" class="back-btn">이전 결과로 돌아가기</button>
                             <button id="startNewSearchBtn" class="back-btn" style="margin-left: 10px;">새로운 검색</button>
                         </div>`;
 
-                    // 오디오 URL이 있으면 오디오 플레이어 설정 및 표시
+                    // 오디오 URL이 있으면 오디오 플레이어 설정 및 '음성으로 듣기' 버튼 이벤트 리스너 추가
                     if (result.audio_url && audioPlayer) {
-                        const fullAudioUrl = BACKEND_BASE_URL + result.audio_url; // 완전한 URL 생성
+                        const fullAudioUrl = BACKEND_BASE_URL + result.audio_url;
                         audioPlayer.src = fullAudioUrl;
-                        audioPlayer.load(); // 새 소스 로드
-                        audioPlayer.style.display = 'block'; // 오디오 플레이어 보이게
-                        audioPlayer.play().catch(e => console.error("오디오 자동 재생 실패:", e)); // 자동 재생 시도
+                        audioPlayer.load();
+                        audioPlayer.style.display = 'none'; // **초기에는 오디오 플레이어 숨김**
+
+                        // '음성으로 듣기' 버튼에 이벤트 리스너 추가
+                        const playAudioBtn = document.getElementById('playAudioBtn');
+                        if (playAudioBtn) {
+                            playAudioBtn.addEventListener('click', () => {
+                                audioPlayer.style.display = 'block'; // **버튼 클릭 시 오디오 플레이어 보이게**
+                                audioPlayer.play().catch(e => console.error("오디오 자동 재생 실패:", e)); // 자동 재생 시도
+                                playAudioBtn.style.display = 'none'; // **버튼 클릭 후 '음성으로 듣기' 버튼 숨김**
+                            });
+                        }
                     } else if (audioPlayer) {
                         resetAudioPlayer(); // 오디오 URL이 없으면 숨김
                     }
@@ -368,9 +379,3 @@ document.addEventListener('DOMContentLoaded', () => {
     reSummarizeBtn.style.display = 'none'; // 재요약 버튼 초기 숨김
     resetAudioPlayer(); // 오디오 플레이어 초기 숨김
 });
-
-
-
-
-
-
