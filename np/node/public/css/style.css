@@ -500,4 +500,46 @@ ul {
         font-size: 0.9rem;
         padding: 8px 15px;
     }
+
 }
+
+/* 상단 네비게이션 새 디자인 */
+        .custom-nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: white;
+            border-radius: 16px;
+            margin: 24px auto 16px auto;
+            padding: 20px 40px;
+            max-width: 900px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+            flex-wrap: wrap;
+        }
+
+        .service-title {
+            font-size: 1.6rem;
+            font-weight: bold;
+            color: #6874AA;
+        }
+
+        .nav-right {
+            display: flex;
+            gap: 12px;
+            margin-top: 10px;
+        }
+
+        .nav-tab {
+            background: linear-gradient(to right, #404C7E, #979FD8);
+            padding: 8px 20px;
+            border-radius: 999px;
+            color: white;
+            font-weight: 500;
+            text-decoration: none;
+            font-size: 0.9rem;
+            transition: background 0.3s;
+        }
+
+        .nav-tab:hover {
+            background: linear-gradient(to right, #142755, #6874AA);
+        }
