@@ -8,13 +8,13 @@
     <link rel="stylesheet" href="/css/style.css" />
 </head>
 <body>
+    <div class="navbar">
+        <a href="http://13.236.151.41:3000">회의 서비스</a>
+        <a href="http://3.25.208.15:3000">뉴스 서비스</a>
+    </div>
+
     <div class="container">
         <h1>통합 미디어 요약 서비스</h1>
-
-        <div class="navbar">
-            <a href="http://13.236.151.41:3000">회의 서비스</a>
-            <a href="http://3.25.208.15:3000">뉴스 서비스</a>
-        </div>
 
         <div class="search-bar">
             <input type="text" id="keywordInput" placeholder="검색어를 입력하세요 (예: BTS, 인공지능 뉴스)" />
@@ -31,7 +31,8 @@
             <div class="result-col news-section">
                 <h2>
                     뉴스 요약
-                    <button class="select-all-btn" id="selectAllNews">전체 선택</button> </h2>
+                    <button class="select-all-btn" id="selectAllNews">전체 선택</button>
+                </h2>
                 <ul id="newsList">
                 </ul>
             </div>
@@ -39,7 +40,8 @@
             <div class="result-col youtube-section">
                 <h2>
                     유튜브 요약
-                    <button class="select-all-btn" id="selectAllYt">전체 선택</button> </h2>
+                    <button class="select-all-btn" id="selectAllYt">전체 선택</button>
+                </h2>
                 <ul id="ytList">
                 </ul>
             </div>
