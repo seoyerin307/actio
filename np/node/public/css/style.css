@@ -1,37 +1,60 @@
 <!DOCTYPE html>
 <html lang="ko">
 <head>
-  <meta charset="UTF-8" />
-  <title><%= title %></title>
-  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;700&display=swap" rel="stylesheet">
-  <link rel="stylesheet" href="/css/style.css" />
+    <meta charset="UTF-8" />
+    <title><%= title %></title>
+    <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/css/style.css" />
 </head>
 <body>
-  <div class="container">
-    <h1>통합 미디어 요약 서비스</h1>
-    <div class="search-bar">
-      <input type="text" id="keywordInput" placeholder="검색어를 입력하세요" />
-      <select id="sortSelect">
-        <option value="sim">관련도순</option>
-        <option value="date">최신순</option>
-      </select>
-      <button id="searchBtn">검색</button>
+    <div class="navbar">
+        <a href="http://13.236.151.41:3000">회의 서비스</a>
+        <a href="http://3.25.208.15:3000">뉴스 서비스</a>
     </div>
-    <div class="result-flex">
-      <div class="result-col">
-        <h2>뉴스 요약</h2>
-        <ul id="newsList"></ul>
-      </div>
-      <div class="result-col">
-        <h2>유튜브 요약</h2>
-        <ul id="ytList"></ul>
-      </div>
+
+    <div class="container">
+        <h1>통합 미디어 요약 서비스</h1>
+        <div class="search-bar">
+            <input type="text" id="keywordInput" placeholder="검색어를 입력하세요" />
+            <select id="sortSelect">
+                <option value="sim">관련도순</option>
+                <option value="date">최신순</option>
+            </select>
+            <button id="searchBtn">검색</button>
+        </div>
+        <div class="result-flex">
+            <div class="result-col news-section">
+                <h2>
+                    뉴스 요약
+                    <button class="select-all-btn" id="selectAllNews">전체 선택</button>
+                </h2>
+                <ul id="newsList"></ul>
+            </div>
+            <div class="result-col youtube-section">
+                <h2>
+                    유튜브 요약
+                    <button class="select-all-btn" id="selectAllYt">전체 선택</button>
+                </h2>
+                <ul id="ytList"></ul>
+            </div>
+        </div>
+
+        <button id="reSummarizeBtn" class="re-summarize-btn">선택한 본문 재요약</button>
+        
+        <div id="finalSummary">
+        </div>
     </div>
-  </div>
-  <script src="/js/main.js"></script>
+    <script src="/js/main.js"></script>
 </body>
 </html>
-5. style.css (/np/public/css/style.css)
+style.css (전체 수정 및 정리)
+제공해주신 코드를 기반으로 잘못된 부분을 수정하고, navbar 스타일을 상단에 명시적으로 추가하여 전체적으로 정리했습니다.
+
+CSS
+
+/* style.css */
+
+/* 기본 설정 */
 body {
     font-family: 'Noto Sans KR', 'Roboto', Arial, sans-serif;
     background: #f6f8fa;
@@ -40,6 +63,33 @@ body {
     line-height: 1.6;
 }
 
+/* 내비게이션 바 스타일 */
+.navbar {
+    background-color: #2c73e8; /* 배경색 */
+    color: white;
+    padding: 12px 24px;
+    display: flex;
+    justify-content: flex-end; /* 오른쪽 정렬 */
+    gap: 24px;
+    font-size: 15px;
+    position: sticky; /* 스크롤 시 상단 고정 */
+    top: 0;
+    z-index: 10; /* 다른 요소 위에 오도록 */
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1); /* 그림자 효과 */
+}
+
+.navbar a {
+    color: white;
+    text-decoration: none;
+    font-weight: 500;
+    transition: text-decoration 0.2s ease;
+}
+
+.navbar a:hover {
+    text-decoration: underline;
+}
+
+/* 컨테이너 */
 .container {
     max-width: 900px;
     margin: 48px auto;
@@ -58,6 +108,7 @@ h1 {
     letter-spacing: 1.5px;
 }
 
+/* 검색 바 */
 .search-bar {
     display: flex;
     justify-content: center;
@@ -102,42 +153,7 @@ button:disabled { /* 비활성화된 버튼 스타일 */
     box-shadow: none;
 }
 
-
-/* 검색 타입 선택 (라디오 버튼) 스타일 */
-.search-type-selection {
-    display: flex;
-    gap: 10px;
-    align-items: center;
-}
-
-.search-type-selection input[type="radio"] {
-    display: none; /* 기본 라디오 버튼 숨김 */
-}
-
-.search-type-selection label {
-    padding: 10px 18px;
-    font-size: 1em;
-    border: 1.5px solid #a0aec0; /* 테두리 색상 */
-    border-radius: 20px; /* 둥근 모양 */
-    color: #4a5568; /* 글자 색상 */
-    cursor: pointer;
-    transition: background-color 0.2s, color 0.2s, border-color 0.2s;
-    white-space: nowrap; /* 줄바꿈 방지 */
-}
-
-.search-type-selection input[type="radio"]:checked + label {
-    background-color: #2563eb; /* 선택 시 배경색 */
-    color: #fff; /* 선택 시 글자색 */
-    border-color: #2563eb; /* 선택 시 테두리 색상 */
-    font-weight: bold;
-    box-shadow: 0 2px 8px rgba(37, 99, 235, 0.2);
-}
-.search-type-selection label:hover {
-    background-color: #e0e7ff;
-    color: #2563eb;
-}
-
-
+/* 전체 선택 버튼 */
 .select-all-btn {
     padding: 5px 10px;
     font-size: 14px;
@@ -154,6 +170,7 @@ button:disabled { /* 비활성화된 버튼 스타일 */
     background-color: #c4d0f6;
 }
 
+/* 결과 섹션 */
 .result-flex {
     display: flex;
     gap: 32px;
@@ -181,9 +198,13 @@ button:disabled { /* 비활성화된 버튼 스타일 */
     text-align: center;
     font-weight: 700;
     letter-spacing: 1px;
-    display: flex;
+    display: flex; /* 전체 선택 버튼 정렬을 위해 */
     align-items: center;
     justify-content: center;
+}
+/* h2 안에 전체 선택 버튼이 있는 경우 버튼에 왼쪽 마진을 줍니다. */
+.result-col h2 .select-all-btn {
+    margin-left: 10px;
 }
 
 ul {
@@ -271,14 +292,16 @@ ul {
     box-shadow: 0 4px 15px rgba(124, 58, 237, 0.3);
 }
 
-
 /* 최종 요약 결과 카드 */
+#finalSummary {
+    margin-top: 30px; /* 최종 요약 영역 위쪽 마진 */
+}
+
 .final-summary-card {
     background: #fff;
     border-radius: 12px;
     box-shadow: 0 4px 16px rgba(0,0,0,0.1);
     padding: 20px;
-    margin-top: 30px;
     border-left: 4px solid #4f46e5;
     animation: fadeIn 0.4s ease;
     text-align: center; /* 내용 중앙 정렬 */
@@ -401,7 +424,6 @@ ul {
     color: #b91c1c;
 }
 
-
 /* 반응형 디자인 */
 @media (max-width: 900px) {
     .result-flex { 
@@ -435,18 +457,19 @@ ul {
         width: 100%;
         box-sizing: border-box; /* 패딩과 보더가 너비에 포함되도록 */
     }
-    .search-type-selection {
-        flex-direction: row; /* 라디오 버튼은 가로 유지 */
+    /* 라디오 버튼 선택 섹션은 제거되었으므로 해당 미디어 쿼리 스타일도 제거합니다. */
+    /* .search-type-selection {
+        flex-direction: row;
         justify-content: center;
         width: 100%;
-        gap: 8px; /* 간격 줄임 */
+        gap: 8px;
     }
     .search-type-selection label {
-        flex: 1; /* 가로 공간 균등 분배 */
+        flex: 1;
         text-align: center;
         padding: 8px 10px;
         font-size: 0.9em;
-    }
+    } */
     .result-col h2 {
         flex-direction: column;
         gap: 8px;
@@ -477,27 +500,4 @@ ul {
         font-size: 0.9rem;
         padding: 8px 15px;
     }
-    .navbar {
-            background-color: #2c73e8;
-            color: white;
-            padding: 12px 24px;
-            display: flex;
-            justify-content: flex-end;
-            gap: 24px;
-            font-size: 15px;
-            position: sticky;
-            top: 0;
-            z-index: 10;
-        }
-
-        .navbar a {
-            color: white;
-            text-decoration: none;
-            font-weight: 500;
-        }
-
-        .navbar a:hover {
-            text-decoration: underline;
-        }
-
 }

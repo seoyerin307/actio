@@ -19,14 +19,6 @@
         <div class="search-bar">
             <input type="text" id="keywordInput" placeholder="검색어를 입력하세요 (예: BTS, 인공지능 뉴스)" />
 
-            <div class="search-type-selection">
-                <input type="radio" id="searchTypeNews" name="searchType" value="news" checked>
-                <label for="searchTypeNews">뉴스</label>
-
-                <input type="radio" id="searchTypeYoutube" name="searchType" value="youtube">
-                <label for="searchTypeYoutube">유튜브</label>
-            </div>
-            
             <select id="sortSelect" class="sort-select">
                 <option value="sim">관련도순</option>
                 <option value="date">최신순</option>
@@ -39,7 +31,7 @@
             <div class="result-col news-section">
                 <h2>
                     뉴스 요약
-                </h2>
+                    <button class="select-all-btn" id="selectAllNews">전체 선택</button> </h2>
                 <ul id="newsList">
                 </ul>
             </div>
@@ -47,7 +39,7 @@
             <div class="result-col youtube-section">
                 <h2>
                     유튜브 요약
-                </h2>
+                    <button class="select-all-btn" id="selectAllYt">전체 선택</button> </h2>
                 <ul id="ytList">
                 </ul>
             </div>
