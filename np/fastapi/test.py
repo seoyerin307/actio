@@ -10,11 +10,14 @@ from typing import List, Optional
 from dotenv import load_dotenv
 from fastapi import FastAPI, Query, HTTPException, Body
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import FileResponse # FileResponse 임포트
+from fastapi.responses import FileResponse
+from fastapi.staticfiles import StaticFiles # StaticFiles 임포트
 from pydantic import BaseModel
 import openai
 from konlpy.tag import Okt
 from requests.exceptions import HTTPError, ConnectionError, Timeout
+import uvicorn # uvicorn 임포트 (if __name__ == "__main__": 블록에서 직접 실행 시 필요)
+
 
 # 환경변수 로드
 load_dotenv()
@@ -25,7 +28,7 @@ SUPADATA_API_KEY = os.getenv("SUPADATA_API_KEY", "YOUR_SUPADATA_API_KEY")
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY", "YOUR_OPENAI_API_KEY")
 NAVER_CLIENT_ID = os.getenv("NAVER_CLIENT_ID", "YOUR_NAVER_CLIENT_ID")
 NAVER_CLIENT_SECRET = os.getenv("NAVER_CLIENT_SECRET", "YOUR_NAVER_CLIENT_SECRET")
-# ElevenLabs API 키 추가
+# ElevenLabs API 키 추가 (환경 변수에서 로드)
 ELEVENLABS_API_KEY = os.getenv("ELEVENLABS_API_KEY", "YOUR_ELEVENLABS_API_KEY")
 
 print(f"YOUTUBE_API_KEY loaded: {'Yes' if YOUTUBE_API_KEY != 'YOUR_YOUTUBE_API_KEY' else 'No (default)'}")
@@ -60,7 +63,6 @@ AUDIO_DIR = Path("audio_summaries")
 AUDIO_DIR.mkdir(exist_ok=True, parents=True)
 
 # FastAPI 정적 파일 서빙 설정 (오디오 파일 접근을 위해 필요)
-from fastapi.staticfiles import StaticFiles
 app.mount("/audio", StaticFiles(directory=AUDIO_DIR), name="audio")
 
 
@@ -418,7 +420,8 @@ async def summarize_originals(originals: dict = Body(...)):
         summary = response.choices[0].message['content']
 
         if summary:
-            korean_voice_id = os.getenv("ELEVENLABS_KOREAN_VOICE_ID", "21m00Tcm4TlvDpxAtCSJ") # .env에 ELEVENLABS_KOREAN_VOICE_ID 추가
+            # 이 부분을 직접 Voice ID로 교체합니다.
+            korean_voice_id = "fLvpMIGwcTmxzsUF4z1U" # 직접 'Bella' 음성 ID 삽입
             audio_url = await generate_audio_from_text(summary, voice_id=korean_voice_id)
             if not audio_url:
                 print("[WARNING] ElevenLabs 음성 생성에 실패했습니다.")
