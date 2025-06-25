@@ -296,7 +296,7 @@ def summarize_youtube_text(text: str) -> str:
 async def generate_audio_from_text(text: str, voice_id: str = "21m00Tcm4TlvDpxAtCSJ", stability: float = 0.5, clarity: float = 0.75) -> Optional[str]:
     """
     ElevenLabs API를 사용하여 텍스트를 오디오로 변환하고, 파일 경로를 반환합니다.
-    기본 voice_id는 Adam (영어 남성 목소리)입니다. 한국어에 적합한 다른 voice_id를 사용하세요.
+    voice_id는 함수 호출 시 전달되는 값 또는 기본값 (Adam)을 사용합니다.
     """
     if not ELEVENLABS_API_KEY or ELEVENLABS_API_KEY == "YOUR_ELEVENLABS_API_KEY":
         print("[ERROR] ElevenLabs API 키가 설정되지 않았습니다.")
@@ -440,5 +440,4 @@ async def summarize_originals(originals: dict = Body(...)):
         return {"summary": f"재요약 실패: {str(e)}", "audio_url": None}
 
 if __name__ == "__main__":
-    import uvicorn
     uvicorn.run(app, host="0.0.0.0", port=8000)
