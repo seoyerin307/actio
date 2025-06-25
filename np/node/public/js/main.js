@@ -11,6 +11,10 @@ document.addEventListener('DOMContentLoaded', () => {
     const resultFlexContainer = document.querySelector('.result-flex'); // 뉴스/유튜브 결과를 담는 컨테이너 (레이아웃 조절용)
     const searchBar = document.querySelector('.search-bar'); // 검색 바 (레이아웃 조절용)
 
+    // ** 중요: FastAPI 백엔드의 기본 URL 설정 **
+    // Docker 로그에서 확인된 외부 IP와 포트를 사용합니다.
+    const BACKEND_BASE_URL = "http://3.25.208.15:8080"; 
+
     // 2. 이전 뉴스/유튜브 결과를 저장할 변수 (이전 화면으로 돌아갈 때 사용)
     let previousNewsHtml = '';
     let previousYtHtml = '';
@@ -24,7 +28,8 @@ document.addEventListener('DOMContentLoaded', () => {
     async function fetchNews(keyword, sort) {
         showLoading(newsList); // 뉴스 로딩 표시
         try {
-            const response = await fetch(`/summaries?q=${encodeURIComponent(keyword)}&sort=${sort}`);
+            // API 호출 URL에 BACKEND_BASE_URL을 추가
+            const response = await fetch(`${BACKEND_BASE_URL}/news/summaries?q=${encodeURIComponent(keyword)}&sort=${sort}`);
             const data = await response.json(); // 응답을 JSON으로 파싱
 
             if (!response.ok) {
@@ -81,7 +86,8 @@ document.addEventListener('DOMContentLoaded', () => {
     async function fetchYoutube(keyword) {
         showLoading(ytList); // 유튜브 로딩 표시
         try {
-            const response = await fetch(`/youtube-summaries?keyword=${encodeURIComponent(keyword)}`);
+            // API 호출 URL에 BACKEND_BASE_URL을 추가
+            const response = await fetch(`${BACKEND_BASE_URL}/youtube-summaries?keyword=${encodeURIComponent(keyword)}`);
             const data = await response.json(); // 응답을 JSON으로 파싱
 
             if (!response.ok) {
@@ -110,9 +116,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 checkbox.checked = false; // 초기에는 체크 해제
 
                 const titleLink = document.createElement('a');
-                // 유튜브 영상 링크: 'https://youtu.be/$${item.video_id}'는 잘못된 URL입니다.
-                // 올바른 유튜브 영상 링크 형식으로 수정: `https://www.youtube.com/watch?v=${item.video_id}`
-                titleLink.href = `https://www.youtube.com/watch?v=${item.video_id}`;
+                // 유튜브 영상 링크: 올바른 유튜브 영상 링크 형식으로 수정
+                titleLink.href = `https://www.youtube.com/watch?v=${item.video_id}`; // 수정!
                 titleLink.target = '_blank'; // 새 탭에서 열기
                 titleLink.textContent = item.title;
                 titleLink.className = 'yt-title';
@@ -146,8 +151,8 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
 
-        fetchNews(keyword, sort);    // 뉴스 검색 시작
-        fetchYoutube(keyword);     // 유튜브 검색 시작
+        fetchNews(keyword, sort);     // 뉴스 검색 시작
+        fetchYoutube(keyword);      // 유튜브 검색 시작
 
         // 새 검색 시작 시 모든 섹션 다시 보이게 설정 (초기 상태로 복원)
         if (resultFlexContainer) {
@@ -213,7 +218,8 @@ document.addEventListener('DOMContentLoaded', () => {
         }
 
         try {
-            const response = await fetch('/summarize-originals', {
+            // API 호출 URL에 BACKEND_BASE_URL을 추가!
+            const response = await fetch(`${BACKEND_BASE_URL}/summarize-originals`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ originals: selectedOriginals })
@@ -224,12 +230,12 @@ document.addEventListener('DOMContentLoaded', () => {
             if (!contentType.includes('application/json')) {
                 const text = await response.text();
                 finalSummaryDiv.innerHTML = `<div class="final-summary-card error-card">
-                                                <h3>오류 발생</h3>
-                                                <p>서버로부터 유효하지 않은 응답을 받았습니다.</p>
-                                                <pre>${text.slice(0, 500)}</pre>
-                                                <button id="backToPreviousBtn" class="back-btn">이전 결과로 돌아가기</button>
-                                                <button id="startNewSearchBtn" class="back-btn" style="margin-left: 10px;">새로운 검색</button>
-                                              </div>`;
+                                                 <h3>오류 발생</h3>
+                                                 <p>서버로부터 유효하지 않은 응답을 받았습니다.</p>
+                                                 <pre>${text.slice(0, 500)}</pre>
+                                                 <button id="backToPreviousBtn" class="back-btn">이전 결과로 돌아가기</button>
+                                                 <button id="startNewSearchBtn" class="back-btn" style="margin-left: 10px;">새로운 검색</button>
+                                             </div>`;
             } else {
                 const result = await response.json(); // JSON 응답 파싱
 
@@ -247,7 +253,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 } else { // 재요약 성공
                     let audioPlayButtonHtml = '';
                     if (result.audio_url) {
-                        // FastAPI에서 받은 audio_url을 data-audio-url 속성에 저장
+                        // FastAPI에서 받은 audio_url을 data-audio-url 속성에 저장 (상대 경로)
                         audioPlayButtonHtml = `<button id="playSummaryAudioBtn" class="play-audio-btn" data-audio-url="${result.audio_url}">🔊 요약 듣기</button>`;
                     } else {
                         audioPlayButtonHtml = `<p class="warning-text">음성 생성에 실패했거나 음성 URL이 없습니다.</p>`;
@@ -269,12 +275,17 @@ document.addEventListener('DOMContentLoaded', () => {
                     const playAudioBtn = document.getElementById('playSummaryAudioBtn');
                     if (playAudioBtn) {
                         playAudioBtn.addEventListener('click', () => {
-                            const audioUrl = playAudioBtn.dataset.audioUrl; // data-audio-url에서 URL 가져오기
-                            if (audioUrl) {
-                                const audio = new Audio(audioUrl);
+                            const relativeAudioUrl = playAudioBtn.dataset.audioUrl; // data-audio-url에서 상대 URL 가져오기
+                            if (relativeAudioUrl) {
+                                // **핵심 수정 부분:** BACKEND_BASE_URL을 붙여서 완전한 URL을 만듭니다.
+                                const fullAudioUrl = BACKEND_BASE_URL + relativeAudioUrl;
+                                
+                                console.log("재생 시도할 최종 오디오 URL:", fullAudioUrl); // 디버깅용 로그
+
+                                const audio = new Audio(fullAudioUrl); // 완전한 URL 사용
                                 audio.play().catch(error => {
                                     console.error("오디오 재생 실패:", error);
-                                    alert("오디오 재생에 실패했습니다: " + error.message);
+                                    alert("오디오 재생에 실패했습니다: " + error.message + "\nURL: " + fullAudioUrl); // URL도 함께 표시하여 디버깅 용이하게
                                 });
                             } else {
                                 alert("재생할 오디오 URL이 없습니다.");
@@ -343,11 +354,11 @@ document.addEventListener('DOMContentLoaded', () => {
             // 네트워크 오류 등 fetch 자체의 오류
             console.error('재요약 요청 중 오류 발생:', error);
             finalSummaryDiv.innerHTML = `<div class="final-summary-card error-card">
-                                            <h3>재요약 중 오류 발생</h3>
-                                            <p>네트워크 문제 또는 서버 응답 오류: ${error.message}</p>
-                                            <button id="backToPreviousBtn" class="back-btn">이전 결과로 돌아가기</button>
-                                            <button id="startNewSearchBtn" class="back-btn" style="margin-left: 10px;">새로운 검색</button>
-                                          </div>`;
+                                             <h3>재요약 중 오류 발생</h3>
+                                             <p>네트워크 문제 또는 서버 응답 오류: ${error.message}</p>
+                                             <button id="backToPreviousBtn" class="back-btn">이전 결과로 돌아가기</button>
+                                             <button id="startNewSearchBtn" class="back-btn" style="margin-left: 10px;">새로운 검색</button>
+                                         </div>`;
             // 에러 발생 시에도 스크롤 (사용자에게 오류 메시지 보이기 위함)
             finalSummaryDiv.scrollIntoView({ behavior: 'smooth', block: 'start' });
 
