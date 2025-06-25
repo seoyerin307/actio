@@ -56,38 +56,60 @@ CSS
 
 /* 기본 설정 */
 body {
-    font-family: 'Segoe UI', sans-serif;
+    font-family: 'Noto Sans KR', 'Segoe UI', sans-serif; /* Noto Sans KR 우선 적용 */
     background-color: #f5f7fa;
     margin: 0;
     padding: 0;
     line-height: 1.6;
 }
 
-/* 내비게이션 바 스타일 */
-.navbar {
-    background-color:#404C7E; /* 배경색 */
-    color: white;
-    padding: 12px 24px;
+/* 상단 내비게이션 바 스타일 (custom-nav) */
+.custom-nav {
     display: flex;
-    justify-content: flex-end; /* 오른쪽 정렬 */
-    gap: 24px;
-    font-size: 15px;
-    position: sticky; /* 스크롤 시 상단 고정 */
-    top: 0;
-    z-index: 10; /* 다른 요소 위에 오도록 */
-    box-shadow: 0 2px 10px rgba(0,0,0,0.1); /* 그림자 효과 */
+    justify-content: space-between;
+    align-items: center;
+    background: white;
+    border-radius: 16px;
+    margin: 24px auto 16px auto;
+    padding: 20px 40px;
+    max-width: 900px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+    flex-wrap: wrap; /* 작은 화면에서 줄바꿈 */
 }
 
-.navbar a {
-    color: white;
+.service-title {
+    font-size: 1.6rem;
+    font-weight: bold;
+    color: #6874AA;
+    display: flex; /* 아이콘과 텍스트 정렬 */
+    align-items: center;
+}
+.service-title a {
     text-decoration: none;
-    font-weight: 500;
-    transition: text-decoration 0.2s ease;
+    color: #6874AA;
 }
 
-.navbar a:hover {
-    text-decoration: underline;
+.nav-right {
+    display: flex;
+    gap: 12px;
+    /* margin-top: 10px; // 작은 화면에서만 적용되도록 미디어 쿼리 안으로 이동 */
 }
+
+.nav-tab {
+    background: linear-gradient(to right, #404C7E, #979FD8);
+    padding: 8px 20px;
+    border-radius: 999px;
+    color: white;
+    font-weight: 500;
+    text-decoration: none;
+    font-size: 0.9rem;
+    transition: background 0.3s;
+}
+
+.nav-tab:hover {
+    background: linear-gradient(to right, #142755, #6874AA);
+}
+
 
 /* 컨테이너 */
 .container {
@@ -126,10 +148,12 @@ input[type="text"], select {
     outline: none;
     transition: border 0.2s;
     background: #f1f5f9;
+    flex-grow: 1; /* 검색창이 남은 공간을 채우도록 */
+    min-width: 200px; /* 너무 작아지지 않도록 최소 너비 설정 */
 }
 
-input[type="text"]:focus, select:focus {
-    border-color: #404C7E;
+select {
+    flex-grow: 0; /* select는 grow하지 않도록 */
 }
 
 button {
@@ -224,7 +248,7 @@ ul {
     flex-direction: column; /* 체크박스, 제목, 요약 세로 정렬 */
     gap: 7px;
     transition: box-shadow 0.2s, background 0.2s;
-    border-left: 4px solid#404C7E;
+    border-left: 4px solid #404C7E;
     position: relative; /* 체크박스 위치를 위해 */
 }
 .news-card:hover, .yt-card:hover {
@@ -251,12 +275,12 @@ ul {
 .news-title, .yt-title {
     font-size: 1.1rem;
     font-weight: 700;
-    color:#404C7E;
+    color: #404C7E;
     text-decoration: none;
     transition: color 0.2s;
 }
 .news-title:hover, .yt-title:hover {
-    color:  #404C7E;
+    color: #404C7E;
     text-decoration: underline;
 }
 
@@ -295,6 +319,7 @@ ul {
 /* 최종 요약 결과 카드 */
 #finalSummary {
     margin-top: 30px; /* 최종 요약 영역 위쪽 마진 */
+    /* finalSummary가 오디오 플레이어와 동일한 너비를 가지도록 flex 컨테이너에 포함시키거나 max-width를 줍니다. */
 }
 
 .final-summary-card {
@@ -314,7 +339,7 @@ ul {
 
 .final-summary-card h3 {
     margin-top: 0;
-    color:#404C7E;
+    color: #404C7E;
     border-bottom: 1px solid #e0e7ff;
     padding-bottom: 10px;
     font-size: 1.8rem;
@@ -333,42 +358,39 @@ ul {
     padding: 0 10px; /* 좌우 여백 */
 }
 
-/* 오디오 컨트롤 및 버튼 */
-.audio-controls {
+/* 오디오 플레이어 스타일 */
+#audioPlayer {
+    width: 100%; /* 컨테이너 너비에 맞춤 */
     margin-top: 20px;
-    margin-bottom: 20px;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    gap: 15px; /* 버튼과 경고 텍스트 사이 간격 */
+    margin-bottom: 20px; /* 아래 여백 추가 */
+    box-sizing: border-box; /* 패딩, 보더가 너비에 포함되도록 */
+    border-radius: 8px; /* 부드러운 모서리 */
+    box-shadow: 0 2px 10px rgba(0,0,0,0.1); /* 약간의 그림자 */
+    outline: none; /* 포커스 시 아웃라인 제거 */
 }
 
-.play-audio-btn {
-    padding: 12px 25px;
-    background-color: #f59e0b; /* 주황색 계열 */
-    color: white;
-    border: none;
-    border-radius: 8px;
-    cursor: pointer;
-    font-size: 1.1em;
-    font-weight: bold;
-    transition: background-color 0.3s, transform 0.2s;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    box-shadow: 0 2px 10px rgba(245, 158, 11, 0.2);
+/* 오디오 컨트롤 내부 요소 스타일 (선택적) */
+#audioPlayer::-webkit-media-controls-panel {
+    background-color: #f1f5f9; /* 컨트롤 패널 배경색 */
+    color: #404C7E; /* 아이콘 색상 */
+    border-radius: 8px; /* 컨트롤 패널 모서리 둥글게 */
+}
+#audioPlayer::-webkit-media-controls-play-button {
+    color: #404C7E;
+}
+#audioPlayer::-webkit-media-controls-timeline {
+    background-color: #e0e7ff;
+    border-radius: 5px;
+}
+#audioPlayer::-webkit-media-controls-current-time-display,
+#audioPlayer::-webkit-media-controls-time-remaining-display {
+    color: #404C7E;
+}
+#audioPlayer::-webkit-media-controls-volume-slider {
+    background-color: #e0e7ff;
+    border-radius: 5px;
 }
 
-.play-audio-btn:hover {
-    background-color: #d97706;
-    transform: translateY(-2px);
-}
-
-.warning-text {
-    color: #ea580c; /* 어두운 주황색 */
-    font-weight: bold;
-    font-size: 0.95em;
-}
 
 /* 돌아가기 및 새로운 검색 버튼 */
 .back-btn {
@@ -434,6 +456,14 @@ ul {
         margin: 20px auto;
         padding: 20px;
     }
+    .custom-nav {
+        padding: 15px 20px; /* 작은 화면에서 패딩 줄임 */
+    }
+    .nav-right {
+        margin-top: 10px; /* 작은 화면에서만 상단 여백 추가 */
+        width: 100%; /* 버튼이 아래로 내려가도록 */
+        justify-content: center; /* 버튼 중앙 정렬 */
+    }
 }
 
 @media (max-width: 600px) {
@@ -457,19 +487,6 @@ ul {
         width: 100%;
         box-sizing: border-box; /* 패딩과 보더가 너비에 포함되도록 */
     }
-    /* 라디오 버튼 선택 섹션은 제거되었으므로 해당 미디어 쿼리 스타일도 제거합니다. */
-    /* .search-type-selection {
-        flex-direction: row;
-        justify-content: center;
-        width: 100%;
-        gap: 8px;
-    }
-    .search-type-selection label {
-        flex: 1;
-        text-align: center;
-        padding: 8px 10px;
-        font-size: 0.9em;
-    } */
     .result-col h2 {
         flex-direction: column;
         gap: 8px;
@@ -496,50 +513,9 @@ ul {
     .final-summary-card p {
         font-size: 1rem;
     }
-    .play-audio-btn, .back-btn {
+    .play-audio-btn, .back-btn { /* 이 부분은 이제 main.js에서 사용되지 않음 */
         font-size: 0.9rem;
         padding: 8px 15px;
     }
 
 }
-
-/* 상단 네비게이션 새 디자인 */
-        .custom-nav {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            background: white;
-            border-radius: 16px;
-            margin: 24px auto 16px auto;
-            padding: 20px 40px;
-            max-width: 900px;
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
-            flex-wrap: wrap;
-        }
-
-        .service-title {
-            font-size: 1.6rem;
-            font-weight: bold;
-            color: #6874AA;
-        }
-
-        .nav-right {
-            display: flex;
-            gap: 12px;
-            margin-top: 10px;
-        }
-
-        .nav-tab {
-            background: linear-gradient(to right, #404C7E, #979FD8);
-            padding: 8px 20px;
-            border-radius: 999px;
-            color: white;
-            font-weight: 500;
-            text-decoration: none;
-            font-size: 0.9rem;
-            transition: background 0.3s;
-        }
-
-        .nav-tab:hover {
-            background: linear-gradient(to right, #142755, #6874AA);
-        }
