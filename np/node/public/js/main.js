@@ -396,22 +396,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    // 9. 뉴스 전체 선택 버튼
-    const selectAllNewsBtn = document.getElementById('selectAllNews');
-    if (selectAllNewsBtn) {
-        selectAllNewsBtn.addEventListener('click', () => {
-            document.querySelectorAll('.news-checkbox').forEach(cb => cb.checked = true);
-        });
-    }
-
-    // 10. 유튜브 전체 선택 버튼
-    const selectAllYtBtn = document.getElementById('selectAllYt');
-    if (selectAllYtBtn) {
-        selectAllYtBtn.addEventListener('click', () => {
-            document.querySelectorAll('.yt-checkbox').forEach(cb => cb.checked = true);
-        });
-    }
-
-    // 11. 페이지 로드 시 재요약 버튼 초기 상태 설정 (숨기기)
+    // 9. 페이지 로드 시 재요약 버튼 초기 상태 설정 (숨기기)
+    // 이 부분의 주석 번호가 11에서 9로 변경되었습니다.
     reSummarizeBtn.style.display = 'none';
 });
