@@ -2,7 +2,7 @@
 <html lang="ko">
 <head>
     <meta charset="UTF-8" />
-    <title>통합 미디어 요약 서비스</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"> <title>통합 미디어 요약 서비스</title>
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="/css/style.css" />
 </head>
@@ -10,35 +10,50 @@
     <div class="container">
         <h1>통합 미디어 요약 서비스</h1>
         <div class="search-bar">
-            <input type="text" id="keywordInput" placeholder="검색어를 입력하세요" />
-            <select id="sortSelect">
+            <input type="text" id="keywordInput" placeholder="검색어를 입력하세요 (예: BTS, 인공지능 뉴스)" />
+
+            <div class="search-type-selection">
+                <input type="radio" id="searchTypeNews" name="searchType" value="news" checked>
+                <label for="searchTypeNews">뉴스</label>
+
+                <input type="radio" id="searchTypeYoutube" name="searchType" value="youtube">
+                <label for="searchTypeYoutube">유튜브</label>
+            </div>
+            
+            <select id="sortSelect" class="sort-select">
                 <option value="sim">관련도순</option>
                 <option value="date">최신순</option>
             </select>
+            
             <button id="searchBtn">검색</button>
         </div>
 
         <div class="result-flex">
-            <div class="result-col">
+            <div class="result-col news-section">
                 <h2>
                     뉴스 요약
                     <button class="select-all-btn" id="selectAllNews">전체 선택</button>
                 </h2>
-                <ul id="newsList"></ul>
+                <ul id="newsList">
+                    </ul>
             </div>
 
-            <div class="result-col">
+            <div class="result-col youtube-section">
                 <h2>
                     유튜브 요약
                     <button class="select-all-btn" id="selectAllYt">전체 선택</button>
                 </h2>
-                <ul id="ytList"></ul>
+                <ul id="ytList">
+                    </ul>
             </div>
         </div>
 
         <button id="reSummarizeBtn" class="re-summarize-btn">선택한 본문 재요약</button>
-        <div id="finalSummary"></div>
+        
+        <div id="finalSummary">
+            </div>
     </div>
+    
     <script src="/js/main.js"></script>
 </body>
 </html>

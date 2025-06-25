@@ -6,10 +6,11 @@ import uuid
 import requests
 import time
 from pathlib import Path
-from typing import List
+from typing import List, Optional
 from dotenv import load_dotenv
 from fastapi import FastAPI, Query, HTTPException, Body
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import FileResponse # FileResponse 임포트
 from pydantic import BaseModel
 import openai
 from konlpy.tag import Okt
@@ -24,12 +25,15 @@ SUPADATA_API_KEY = os.getenv("SUPADATA_API_KEY", "YOUR_SUPADATA_API_KEY")
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY", "YOUR_OPENAI_API_KEY")
 NAVER_CLIENT_ID = os.getenv("NAVER_CLIENT_ID", "YOUR_NAVER_CLIENT_ID")
 NAVER_CLIENT_SECRET = os.getenv("NAVER_CLIENT_SECRET", "YOUR_NAVER_CLIENT_SECRET")
+# ElevenLabs API 키 추가
+ELEVENLABS_API_KEY = os.getenv("ELEVENLABS_API_KEY", "YOUR_ELEVENLABS_API_KEY")
 
 print(f"YOUTUBE_API_KEY loaded: {'Yes' if YOUTUBE_API_KEY != 'YOUR_YOUTUBE_API_KEY' else 'No (default)'}")
 print(f"SUPADATA_API_KEY loaded: {'Yes' if SUPADATA_API_KEY != 'YOUR_SUPADATA_API_KEY' else 'No (default)'}")
 print(f"OPENAI_API_KEY loaded: {'Yes' if OPENAI_API_KEY != 'YOUR_OPENAI_API_KEY' else 'No (default)'}")
 print(f"NAVER_CLIENT_ID loaded: {'Yes' if NAVER_CLIENT_ID != 'YOUR_NAVER_CLIENT_ID' else 'No (default)'}")
 print(f"NAVER_CLIENT_SECRET loaded: {'Yes' if NAVER_CLIENT_SECRET != 'YOUR_NAVER_CLIENT_SECRET' else 'No (default)'}")
+print(f"ELEVENLABS_API_KEY loaded: {'Yes' if ELEVENLABS_API_KEY != 'YOUR_ELEVENLABS_API_KEY' else 'No (default)'}")
 
 
 app = FastAPI(
@@ -50,6 +54,15 @@ okt = Okt()
 
 SUMMARY_DIR = Path("summaries")
 SUMMARY_DIR.mkdir(exist_ok=True, parents=True)
+
+# 음성 파일을 저장할 디렉토리 생성
+AUDIO_DIR = Path("audio_summaries")
+AUDIO_DIR.mkdir(exist_ok=True, parents=True)
+
+# FastAPI 정적 파일 서빙 설정 (오디오 파일 접근을 위해 필요)
+from fastapi.staticfiles import StaticFiles
+app.mount("/audio", StaticFiles(directory=AUDIO_DIR), name="audio")
+
 
 def strip_html_tags(text: str) -> str:
     return re.sub(r'<[^>]+>', '', text)
@@ -277,6 +290,56 @@ def summarize_youtube_text(text: str) -> str:
         print(f"[ERROR] OpenAI 요약 (자막) 실패 (예기치 않은 오류): {e}")
         return f"요약 오류: {str(e)}"
 
+# ElevenLabs 음성 합성 함수
+async def generate_audio_from_text(text: str, voice_id: str = "21m00Tcm4TlvDpxAtCSJ", stability: float = 0.5, clarity: float = 0.75) -> Optional[str]:
+    """
+    ElevenLabs API를 사용하여 텍스트를 오디오로 변환하고, 파일 경로를 반환합니다.
+    기본 voice_id는 Adam (영어 남성 목소리)입니다. 한국어에 적합한 다른 voice_id를 사용하세요.
+    """
+    if not ELEVENLABS_API_KEY or ELEVENLABS_API_KEY == "YOUR_ELEVENLABS_API_KEY":
+        print("[ERROR] ElevenLabs API 키가 설정되지 않았습니다.")
+        return None
+
+
+    url = f"https://api.elevenlabs.io/v1/text-to-speech/{voice_id}"
+    headers = {
+        "xi-api-key": ELEVENLABS_API_KEY,
+        "Content-Type": "application/json",
+        "accept": "audio/mpeg"
+    }
+    data = {
+        "text": text,
+        "model_id": "eleven_multilingual_v2", # 한국어 지원 모델 사용
+        "voice_settings": {
+            "stability": stability,
+            "similarity_boost": clarity
+        }
+    }
+
+    try:
+        async with httpx.AsyncClient(timeout=30) as client_http: # 타임아웃 추가
+            response = await client_http.post(url, headers=headers, json=data)
+            response.raise_for_status() # HTTP 오류가 발생하면 예외 발생
+
+            audio_file_name = f"summary_{uuid.uuid4().hex}.mp3"
+            audio_file_path = AUDIO_DIR / audio_file_name
+
+            with open(audio_file_path, "wb") as f:
+                f.write(response.content)
+            
+            # 클라이언트가 접근할 수 있는 URL 반환
+            return f"/audio/{audio_file_name}"
+    except httpx.HTTPStatusError as e:
+        print(f"[ERROR] ElevenLabs API HTTP 오류: {e.response.status_code} - {e.response.text}")
+        return None
+    except httpx.RequestError as e:
+        print(f"[ERROR] ElevenLabs API 요청 오류 (네트워크/타임아웃): {e}")
+        return None
+    except Exception as e:
+        print(f"[ERROR] ElevenLabs 음성 합성 중 예기치 않은 오류: {e}")
+        return None
+
+
 @app.get("/youtube-summaries", response_model=List[VideoSummary])
 async def summarize_videos(
     keyword: str = Query(..., description="검색할 키워드 (예: 인공지능)")
@@ -326,37 +389,52 @@ async def summarize_originals(originals: dict = Body(...)):
     """
     originals_list = originals.get("originals", [])
     if not originals_list:
-        return {"summary": "선택된 본문이 없습니다."}
+        return {"summary": "선택된 본문이 없습니다.", "audio_url": None} # audio_url 추가
     combined_text = "\n\n".join(originals_list)
+    
+    summary = ""
+    audio_url = None
+
     try:
         if len(combined_text) > 3500:
             combined_text = combined_text[:3500] + "... [중략]"
+        
         response = await openai.ChatCompletion.acreate(
             model="gpt-3.5-turbo",
             messages=[
                 {
                     "role": "system",
                     "content": (
-                        "다음 여러 뉴스 기사와 유튜브 영상 본문을 종합해 핵심 내용을 한국어로 상세하게 요약해 주세요. " # "상세하게" 추가
+                        "다음 여러 뉴스 기사와 유튜브 영상 본문을 종합해 핵심 내용을 한국어로 상세하게 요약해 주세요. "
                         "각 줄은 핵심 내용을 담아야 하며, 불필요하게 문장을 늘리지 마세요."
-                        "중복되는 내용은 한 번만 포함하고, 전체 흐름을 자연스럽게 정리하되, 반드시 15줄 이상으로 요약해 주세요." # 10줄 -> 15줄로 변경
+                        "중복되는 내용은 한 번만 포함하고, 전체 흐름을 자연스럽게 정리하되, 반드시 15줄 이상으로 요약해 주세요."
                     )
                 },
                 {"role": "user", "content": combined_text}
             ],
             temperature=0.2,
-            max_tokens=3000 # 2000에서 3000으로 늘림
+            max_tokens=3000
         )
-        return {"summary": response.choices[0].message['content']}
+        summary = response.choices[0].message['content']
+
+        if summary:
+            korean_voice_id = os.getenv("ELEVENLABS_KOREAN_VOICE_ID", "21m00Tcm4TlvDpxAtCSJ") # .env에 ELEVENLABS_KOREAN_VOICE_ID 추가
+            audio_url = await generate_audio_from_text(summary, voice_id=korean_voice_id)
+            if not audio_url:
+                print("[WARNING] ElevenLabs 음성 생성에 실패했습니다.")
+
+
+        return {"summary": summary, "audio_url": audio_url}
+
     except openai.error.AuthenticationError as e:
         print(f"[ERROR] 재요약 OpenAI 인증 오류: {e}")
-        return {"summary": f"재요약 실패: OpenAI 인증 문제 - {e}"}
+        return {"summary": f"재요약 실패: OpenAI 인증 문제 - {e}", "audio_url": None}
     except openai.error.OpenAIError as e:
         print(f"[ERROR] 재요약 OpenAI API 오류: {e}")
-        return {"summary": f"재요약 실패: OpenAI API 문제 - {e}"}
+        return {"summary": f"재요약 실패: OpenAI API 문제 - {e}", "audio_url": None}
     except Exception as e:
         print(f"[CRITICAL ERROR] /summarize-originals 엔드포인트 처리 중 예기치 않은 오류: {e}")
-        return {"summary": f"재요약 실패: {str(e)}"}
+        return {"summary": f"재요약 실패: {str(e)}", "audio_url": None}
 
 if __name__ == "__main__":
     import uvicorn
