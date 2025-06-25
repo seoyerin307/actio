@@ -11,7 +11,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const audioPlayer = document.getElementById('audioPlayer'); // HTML에 있는 <audio> 태그
 
     const resultFlexContainer = document.querySelector('.result-flex'); // 뉴스/유튜브 결과를 담는 컨테이너
-    const searchBar = document.querySelector('.search-bar');             // 검색 바
+    const searchBar = document.querySelector('.search-bar');          // 검색 바
 
     // ** 중요: FastAPI 백엔드의 기본 URL 설정 **
     // Docker 로그에서 확인된 외부 IP와 포트를 사용합니다.
@@ -38,7 +38,7 @@ document.addEventListener('DOMContentLoaded', () => {
             reSummarizeBtn.style.display = 'none';
         }
         // 최종 요약 div는 별도로 제어되므로 여기서는 건드리지 않습니다.
-        // audioPlayer도 최종 요약 결과에 따라 동적으로 제어됩니다.
+        // audioPlayer는 최종 요약 결과에 따라 동적으로 제어됩니다.
     }
 
     // 5. 오디오 플레이어 초기화 함수
@@ -170,8 +170,8 @@ document.addEventListener('DOMContentLoaded', () => {
                 checkbox.checked = false;
 
                 const titleLink = document.createElement('a');
-                // 유튜브 영상 링크 형식 수정
-                titleLink.href = `https://www.youtube.com/watch?v=${item.video_id}`;
+                // 유튜브 영상 링크 형식: watch?v= 로 변경하는 것이 일반적
+                titleLink.href = `https://www.youtube.com/watch?v=${item.video_id}`; 
                 titleLink.target = '_blank';
                 titleLink.textContent = item.title;
                 titleLink.className = 'yt-title';
@@ -224,7 +224,7 @@ document.addEventListener('DOMContentLoaded', () => {
         reSummarizeBtn.disabled = true; // 재요약 버튼 비활성화
 
         setSectionVisibility(false); // 검색 및 결과 섹션 숨기기
-        resetAudioPlayer(); // 재요약 시작 시 오디오 플레이어 초기화 및 숨기기
+        resetAudioPlayer(); // 재요약 시작 시 오디오 플레이어 초기화 및 숨기기 (기존의 audioPlayer 숨김)
 
         const selectedNews = Array.from(document.querySelectorAll('.news-checkbox:checked'))
             .map(cb => cb.closest('.news-card').dataset.original);
@@ -275,26 +275,38 @@ document.addEventListener('DOMContentLoaded', () => {
                         </div>`;
                 } else {
                     // 성공적으로 요약 결과를 받았을 때
+                    // 오디오 플레이어는 finalSummaryDiv 내부에 동적으로 삽입
                     finalSummaryDiv.innerHTML = `
                         <div class="final-summary-card">
                             <h3>최종 요약 결과</h3>
                             <p>${result.summary || "요약 결과가 없습니다."}</p>
                             <div class="audio-controls">
-                                </div>
+                                ${result.audio_url ? '<button id="playAudioBtn" class="play-audio-btn">음성으로 듣기</button>' : ''}
+                                <audio id="dynamicAudioPlayer" controls style="width: 100%; margin-top: 15px; display: none;"></audio>
+                            </div>
                             <button id="backToPreviousBtn" class="back-btn">이전 결과로 돌아가기</button>
                             <button id="startNewSearchBtn" class="back-btn" style="margin-left: 10px;">새로운 검색</button>
                         </div>`;
 
-                    // 오디오 URL이 있으면 오디오 플레이어 설정 및 표시
-                    if (result.audio_url && audioPlayer) {
-                        const fullAudioUrl = BACKEND_BASE_URL + result.audio_url; // 완전한 URL 생성
-                        audioPlayer.src = fullAudioUrl;
-                        audioPlayer.load(); // 새 소스 로드
-                        audioPlayer.style.display = 'block'; // 오디오 플레이어 보이게
-                        audioPlayer.play().catch(e => console.error("오디오 자동 재생 실패:", e)); // 자동 재생 시도
-                    } else if (audioPlayer) {
-                        resetAudioPlayer(); // 오디오 URL이 없으면 숨김
+                    // 오디오 URL이 있으면 동적 오디오 플레이어 설정 및 '음성으로 듣기' 버튼 이벤트 리스너 추가
+                    if (result.audio_url) {
+                        const dynamicAudioPlayer = document.getElementById('dynamicAudioPlayer');
+                        const fullAudioUrl = BACKEND_BASE_URL + result.audio_url;
+                        dynamicAudioPlayer.src = fullAudioUrl;
+                        dynamicAudioPlayer.load();
+                        dynamicAudioPlayer.style.display = 'none'; // **초기에는 오디오 플레이어 숨김**
+
+                        // '음성으로 듣기' 버튼에 이벤트 리스너 추가
+                        const playAudioBtn = document.getElementById('playAudioBtn');
+                        if (playAudioBtn) {
+                            playAudioBtn.addEventListener('click', () => {
+                                dynamicAudioPlayer.style.display = 'block'; // **버튼 클릭 시 오디오 플레이어 보이게**
+                                dynamicAudioPlayer.play().catch(e => console.error("오디오 자동 재생 실패:", e)); // 자동 재생 시도
+                                playAudioBtn.style.display = 'none'; // **버튼 클릭 후 '음성으로 듣기' 버튼 숨김**
+                            });
+                        }
                     }
+                    // result.audio_url이 없으면 동적 오디오 플레이어 자체가 HTML에 추가되지 않으므로 추가적인 resetAudioPlayer 호출 불필요
                 }
             }
 
@@ -337,7 +349,7 @@ document.addEventListener('DOMContentLoaded', () => {
             // 체크박스 선택 해제 시 최종 요약 및 오디오 플레이어 숨김/초기화
             if (!anyChecked) {
                 finalSummaryDiv.innerHTML = '';
-                resetAudioPlayer();
+                // resetAudioPlayer(); // finalSummaryDiv 내부에 동적 삽입하므로 불필요
             }
         }
     });
@@ -368,9 +380,3 @@ document.addEventListener('DOMContentLoaded', () => {
     reSummarizeBtn.style.display = 'none'; // 재요약 버튼 초기 숨김
     resetAudioPlayer(); // 오디오 플레이어 초기 숨김
 });
-
-
-
-
-
-
