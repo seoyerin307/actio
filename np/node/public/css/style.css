@@ -57,7 +57,7 @@ CSS
 /* 기본 설정 */
 body {
     font-family: 'Segoe UI', sans-serif;
-    background: #f6f8fa;
+    background-color: #f5f7fa;
     margin: 0;
     padding: 0;
     line-height: 1.6;

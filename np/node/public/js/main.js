@@ -615,8 +615,8 @@ document.addEventListener('DOMContentLoaded', () => {
                     reSummarizeBtn.style.display = 'block'; // 재요약 버튼 다시 보이게
                     const audioPlayer = document.getElementById('audioPlayer');
                         if (audioPlayer) {
-                            audioPlayer.style.display = 'block';
-                        }
+                            audioPlayer.style.visibility = 'visible';
+                         }
 
                 }
 
