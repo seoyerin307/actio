@@ -1,19 +1,31 @@
+Here's the corrected JavaScript code to integrate the <audio id="audioPlayer" controls></audio> element for playing the summary audio.
+
+The key changes are:
+
+Audio Player Element: Instead of creating a new Audio object each time, we'll use a single pre-existing <audio> element with id="audioPlayer".
+Setting Source: When a summary audio is available, we'll set the src attribute of this <audio> element to the full audio URL.
+Playing Audio: We'll then call audioPlayer.play().
+<!-- end list -->
+
+JavaScript
+
 document.addEventListener('DOMContentLoaded', () => {
     // 1. DOM 요소 선택
     const searchBtn = document.getElementById('searchBtn');
     const keywordInput = document.getElementById('keywordInput');
     const sortSelect = document.getElementById('sortSelect'); // 뉴스 정렬 기준
     const newsList = document.getElementById('newsList'); // 뉴스 결과 표시 UL
-    const ytList = document.getElementById('ytList');     // 유튜브 결과 표시 UL
+    const ytList = document.getElementById('ytList');    // 유튜브 결과 표시 UL
     const reSummarizeBtn = document.getElementById('reSummarizeBtn'); // 재요약 버튼
     const finalSummaryDiv = document.getElementById('finalSummary'); // 최종 요약 결과 표시 DIV
+    const audioPlayer = document.getElementById('audioPlayer'); // 추가: 오디오 플레이어 요소
 
     const resultFlexContainer = document.querySelector('.result-flex'); // 뉴스/유튜브 결과를 담는 컨테이너 (레이아웃 조절용)
     const searchBar = document.querySelector('.search-bar'); // 검색 바 (레이아웃 조절용)
 
     // ** 중요: FastAPI 백엔드의 기본 URL 설정 **
     // Docker 로그에서 확인된 외부 IP와 포트를 사용합니다.
-    const BACKEND_BASE_URL = "http://3.25.208.15:8080"; 
+    const BACKEND_BASE_URL = "http://3.25.208.15:8080";
 
     // 2. 이전 뉴스/유튜브 결과를 저장할 변수 (이전 화면으로 돌아갈 때 사용)
     let previousNewsHtml = '';
@@ -151,8 +163,8 @@ document.addEventListener('DOMContentLoaded', () => {
             return;
         }
 
-        fetchNews(keyword, sort);     // 뉴스 검색 시작
-        fetchYoutube(keyword);      // 유튜브 검색 시작
+        fetchNews(keyword, sort);    // 뉴스 검색 시작
+        fetchYoutube(keyword);       // 유튜브 검색 시작
 
         // 새 검색 시작 시 모든 섹션 다시 보이게 설정 (초기 상태로 복원)
         if (resultFlexContainer) {
@@ -165,6 +177,12 @@ document.addEventListener('DOMContentLoaded', () => {
             reSummarizeBtn.style.display = 'block'; // 재요약 버튼 다시 보이게
         }
         finalSummaryDiv.innerHTML = ''; // 새 검색 시 이전 최종 요약 결과 지우기
+        // 새 검색 시 오디오 플레이어 초기화
+        if (audioPlayer) {
+            audioPlayer.pause();
+            audioPlayer.removeAttribute('src');
+            audioPlayer.load();
+        }
     });
 
     // 7. 검색 입력창에서 Enter 키 누르면 검색 버튼 클릭 효과
@@ -188,6 +206,12 @@ document.addEventListener('DOMContentLoaded', () => {
         }
         if (reSummarizeBtn) {
             reSummarizeBtn.style.display = 'none'; // 재요약 버튼 숨기기
+        }
+        // 재요약 시 오디오 플레이어 초기화
+        if (audioPlayer) {
+            audioPlayer.pause();
+            audioPlayer.removeAttribute('src');
+            audioPlayer.load();
         }
 
         // 체크된 뉴스 본문과 유튜브 본문 가져오기
@@ -230,12 +254,12 @@ document.addEventListener('DOMContentLoaded', () => {
             if (!contentType.includes('application/json')) {
                 const text = await response.text();
                 finalSummaryDiv.innerHTML = `<div class="final-summary-card error-card">
-                                                 <h3>오류 발생</h3>
-                                                 <p>서버로부터 유효하지 않은 응답을 받았습니다.</p>
-                                                 <pre>${text.slice(0, 500)}</pre>
-                                                 <button id="backToPreviousBtn" class="back-btn">이전 결과로 돌아가기</button>
-                                                 <button id="startNewSearchBtn" class="back-btn" style="margin-left: 10px;">새로운 검색</button>
-                                             </div>`;
+                                            <h3>오류 발생</h3>
+                                            <p>서버로부터 유효하지 않은 응답을 받았습니다.</p>
+                                            <pre>${text.slice(0, 500)}</pre>
+                                            <button id="backToPreviousBtn" class="back-btn">이전 결과로 돌아가기</button>
+                                            <button id="startNewSearchBtn" class="back-btn" style="margin-left: 10px;">새로운 검색</button>
+                                          </div>`;
             } else {
                 const result = await response.json(); // JSON 응답 파싱
 
@@ -251,20 +275,12 @@ document.addEventListener('DOMContentLoaded', () => {
                         </div>
                     `;
                 } else { // 재요약 성공
-                    let audioPlayButtonHtml = '';
-                    if (result.audio_url) {
-                        // FastAPI에서 받은 audio_url을 data-audio-url 속성에 저장 (상대 경로)
-                        audioPlayButtonHtml = `<button id="playSummaryAudioBtn" class="play-audio-btn" data-audio-url="${result.audio_url}">🔊 요약 듣기</button>`;
-                    } else {
-                        audioPlayButtonHtml = `<p class="warning-text">음성 생성에 실패했거나 음성 URL이 없습니다.</p>`;
-                    }
-
                     finalSummaryDiv.innerHTML = `
                         <div class="final-summary-card">
                             <h3>최종 요약 결과</h3>
                             <p>${result.summary || "요약 결과가 없습니다."}</p>
                             <div class="audio-controls">
-                                ${audioPlayButtonHtml}
+                                <button id="playSummaryAudioBtn" class="play-audio-btn">🔊 요약 듣기</button>
                             </div>
                             <button id="backToPreviousBtn" class="back-btn">이전 결과로 돌아가기</button>
                             <button id="startNewSearchBtn" class="back-btn" style="margin-left: 10px;">새로운 검색</button>
@@ -273,24 +289,29 @@ document.addEventListener('DOMContentLoaded', () => {
 
                     // 음성 재생 버튼 이벤트 리스너 추가
                     const playAudioBtn = document.getElementById('playSummaryAudioBtn');
-                    if (playAudioBtn) {
-                        playAudioBtn.addEventListener('click', () => {
-                            const relativeAudioUrl = playAudioBtn.dataset.audioUrl; // data-audio-url에서 상대 URL 가져오기
-                            if (relativeAudioUrl) {
-                                // **핵심 수정 부분:** BACKEND_BASE_URL을 붙여서 완전한 URL을 만듭니다.
-                                const fullAudioUrl = BACKEND_BASE_URL + relativeAudioUrl;
-                                
-                                console.log("재생 시도할 최종 오디오 URL:", fullAudioUrl); // 디버깅용 로그
+                    if (playAudioBtn && result.audio_url) { // audio_url이 있을 때만 버튼 활성화 및 이벤트 추가
+                        // 오디오 플레이어에 src 설정
+                        const fullAudioUrl = BACKEND_BASE_URL + result.audio_url;
+                        audioPlayer.src = fullAudioUrl;
+                        audioPlayer.load(); // 오디오 로드
 
-                                const audio = new Audio(fullAudioUrl); // 완전한 URL 사용
-                                audio.play().catch(error => {
-                                    console.error("오디오 재생 실패:", error);
-                                    alert("오디오 재생에 실패했습니다: " + error.message + "\nURL: " + fullAudioUrl); // URL도 함께 표시하여 디버깅 용이하게
-                                });
-                            } else {
-                                alert("재생할 오디오 URL이 없습니다.");
-                            }
+                        playAudioBtn.addEventListener('click', () => {
+                            console.log("재생 시도할 최종 오디오 URL:", audioPlayer.src); // 디버깅용 로그
+                            audioPlayer.play().catch(error => {
+                                console.error("오디오 재생 실패:", error);
+                                alert("오디오 재생에 실패했습니다: " + error.message + "\nURL: " + audioPlayer.src);
+                            });
                         });
+                    } else if (playAudioBtn) { // audio_url이 없으면 버튼 비활성화 및 경고 표시
+                        playAudioBtn.disabled = true;
+                        playAudioBtn.textContent = "음성 생성 불가";
+                        playAudioBtn.style.backgroundColor = '#ccc';
+                        playAudioBtn.style.cursor = 'not-allowed';
+                        // 경고 문구 추가 (옵션)
+                        const warningP = document.createElement('p');
+                        warningP.className = 'warning-text';
+                        warningP.textContent = '음성 생성에 실패했거나 음성 URL이 없습니다.';
+                        finalSummaryDiv.querySelector('.audio-controls').appendChild(warningP);
                     }
                 }
             }
@@ -318,6 +339,13 @@ document.addEventListener('DOMContentLoaded', () => {
                     cb.checked = false;
                 });
 
+                // 오디오 플레이어 초기화
+                if (audioPlayer) {
+                    audioPlayer.pause();
+                    audioPlayer.removeAttribute('src');
+                    audioPlayer.load();
+                }
+
                 // 스크롤도 다시 위로
                 window.scrollTo({ top: 0, behavior: 'smooth' });
             });
@@ -343,6 +371,13 @@ document.addEventListener('DOMContentLoaded', () => {
                 previousNewsHtml = '';
                 previousYtHtml = '';
 
+                // 오디오 플레이어 초기화
+                if (audioPlayer) {
+                    audioPlayer.pause();
+                    audioPlayer.removeAttribute('src');
+                    audioPlayer.load();
+                }
+
                 // 스크롤도 다시 위로
                 window.scrollTo({ top: 0, behavior: 'smooth' });
             });
@@ -354,11 +389,11 @@ document.addEventListener('DOMContentLoaded', () => {
             // 네트워크 오류 등 fetch 자체의 오류
             console.error('재요약 요청 중 오류 발생:', error);
             finalSummaryDiv.innerHTML = `<div class="final-summary-card error-card">
-                                             <h3>재요약 중 오류 발생</h3>
-                                             <p>네트워크 문제 또는 서버 응답 오류: ${error.message}</p>
-                                             <button id="backToPreviousBtn" class="back-btn">이전 결과로 돌아가기</button>
-                                             <button id="startNewSearchBtn" class="back-btn" style="margin-left: 10px;">새로운 검색</button>
-                                         </div>`;
+                                            <h3>재요약 중 오류 발생</h3>
+                                            <p>네트워크 문제 또는 서버 응답 오류: ${error.message}</p>
+                                            <button id="backToPreviousBtn" class="back-btn">이전 결과로 돌아가기</button>
+                                            <button id="startNewSearchBtn" class="back-btn" style="margin-left: 10px;">새로운 검색</button>
+                                          </div>`;
             // 에러 발생 시에도 스크롤 (사용자에게 오류 메시지 보이기 위함)
             finalSummaryDiv.scrollIntoView({ behavior: 'smooth', block: 'start' });
 
@@ -366,7 +401,6 @@ document.addEventListener('DOMContentLoaded', () => {
             // (위에서 innerHTML을 교체했으므로 기존 리스너가 사라짐)
             // 중복 코드를 줄이기 위해 함수로 만들거나, 상위 scope에서 처리하는 것이 좋지만,
             // 현재 구조에서는 다시 연결하는 방식으로 처리합니다.
-            // **주의:** 실제 프로덕션 코드에서는 이 중복 부분을 개선하는 것이 좋습니다.
             document.getElementById('backToPreviousBtn').addEventListener('click', () => {
                 if (resultFlexContainer) resultFlexContainer.style.display = 'flex';
                 if (searchBar) searchBar.style.display = 'flex';
@@ -375,6 +409,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 newsList.innerHTML = previousNewsHtml;
                 ytList.innerHTML = previousYtHtml;
                 document.querySelectorAll('.summary-checkbox').forEach(cb => cb.checked = false);
+                if (audioPlayer) { audioPlayer.pause(); audioPlayer.removeAttribute('src'); audioPlayer.load(); }
                 window.scrollTo({ top: 0, behavior: 'smooth' });
             });
 
@@ -388,6 +423,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 ytList.innerHTML = '';
                 previousNewsHtml = '';
                 previousYtHtml = '';
+                if (audioPlayer) { audioPlayer.pause(); audioPlayer.removeAttribute('src'); audioPlayer.load(); }
                 window.scrollTo({ top: 0, behavior: 'smooth' });
             });
 
@@ -397,6 +433,5 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     // 9. 페이지 로드 시 재요약 버튼 초기 상태 설정 (숨기기)
-    // 이 부분의 주석 번호가 11에서 9로 변경되었습니다.
     reSummarizeBtn.style.display = 'none';
 });
