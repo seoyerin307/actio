@@ -57,7 +57,7 @@ CSS
 
 body {
     font-family: 'Segoe UI', sans-serif;
-    background: #f6f8fa;
+    background-color: #f5f7fa
     margin: 0;
     padding: 0;
     line-height: 1.6;
@@ -512,15 +512,17 @@ ul {
             border-radius: 16px;
             margin: 24px auto 16px auto;
             padding: 20px 40px;
+            box-sizing: border-box;
             max-width: 900px;
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
             flex-wrap: wrap;
+            width: 100%;
         }
 
         .service-title {
             font-size: 1.6rem;
             font-weight: bold;
-            color: #6874AA;
+            color: #404C7E;
         }
 
         .nav-right {
